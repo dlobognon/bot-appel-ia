@@ -213,7 +213,8 @@ async function handleCallStatus(callData) {
       errorCode: callData.ErrorCode,
       sipResponse: callData.SipResponseCode,
       to: callData.To,
-      from: callData.From
+      from: callData.From,
+      answeredBy: callData.AnsweredBy
     };
 
     logger.info(
