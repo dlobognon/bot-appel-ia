@@ -56,14 +56,27 @@ function normalizeIvorianPhone(phone) {
  */
 async function initGoogleSheets() {
   try {
-    const credentialsPath = process.env.GOOGLE_CREDENTIALS_PATH || './credentials.json';
-    
-    if (!fs.existsSync(credentialsPath)) {
-      logger.error('Fichier credentials.json non trouvé. Consultez GOOGLE_SHEETS_SETUP.md');
-      return false;
-    }
+    let credentials;
 
-    const credentials = JSON.parse(fs.readFileSync(credentialsPath, 'utf8'));
+    // Option 1: Lire depuis la variable d'environnement (Railway)
+    if (process.env.GOOGLE_CREDENTIALS_JSON) {
+      try {
+        credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON);
+      } catch (err) {
+        logger.error('Erreur parsing GOOGLE_CREDENTIALS_JSON:', err.message);
+        return false;
+      }
+    } else {
+      // Option 2: Lire depuis le fichier local (développement)
+      const credentialsPath = process.env.GOOGLE_CREDENTIALS_PATH || './credentials.json';
+      
+      if (!fs.existsSync(credentialsPath)) {
+        logger.error('Fichier credentials.json non trouvé. Consultez GOOGLE_SHEETS_SETUP.md');
+        return false;
+      }
+
+      credentials = JSON.parse(fs.readFileSync(credentialsPath, 'utf8'));
+    }
     
     auth = new google.auth.GoogleAuth({
       credentials,
