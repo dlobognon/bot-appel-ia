@@ -15,15 +15,21 @@ async function syncOrders() {
     logger.info('🔄 Synchronisation des commandes depuis Google Sheets...');
     
     const sheetOrders = await getOrders();
+    const existingOrders = await OrderDB.getAll();
+    
+    // Si la base est vide, accepter tous les statuts valides pour bootstrap
+    const isBootstrap = existingOrders.length === 0;
     
     for (const sheetOrder of sheetOrders) {
       // Vérifier si la commande existe déjà
-      const existingOrders = await OrderDB.getAll();
       const exists = existingOrders.find(o => o.sheet_row === sheetOrder.sheet_row);
       
       if (!exists && sheetOrder.customer_phone) {
-        // Vérifier que le statut est "neutre" ou "injoignable"
-        const validStatuses = ['neutre', 'injoignable'];
+        // Statuts valides pour import
+        const validStatuses = isBootstrap 
+          ? ['neutre', 'injoignable', 'imported'] // Bootstrap: accepter imported aussi
+          : ['neutre', 'injoignable']; // Normal: uniquement neutre/injoignable
+        
         if (!validStatuses.includes(sheetOrder.status)) {
           logger.info(`⏭️ Commande ignorée (statut: ${sheetOrder.status}): ${sheetOrder.customer_name}`);
           continue;
@@ -41,10 +47,12 @@ async function syncOrders() {
         
         logger.info(`✅ Nouvelle commande importée: ${sheetOrder.customer_name} - ${sheetOrder.products}`);
         
-        // Marquer comme importée dans Google Sheets
-        await updateOrderStatus(sheetOrder.sheet_row, 'imported', 'Commande importée dans le système');
+        // NE PLUS marquer comme imported dans Google Sheets
+        // Le statut reste "neutre" ou ce qu'il était, pour permettre la réimportation
       }
     }
+    
+    logger.info(`📊 Import terminé: ${existingOrders.length} commandes en base`);
     
   } catch (error) {
     logger.error('Erreur synchronisation commandes:', error.message);
