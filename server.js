@@ -1,96 +1,99 @@
 require('dotenv').config();
+
+const http = require('http');
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const twilio = require('twilio');
+
 const logger = require('./utils/logger');
+
 const callRoutes = require('./routes/callRoutes');
 const automatedRoutes = require('./routes/automatedRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const botControlRoutes = require('./routes/botControl');
+
 const { initGoogleSheets } = require('./services/googleSheets');
 const { startAutomation } = require('./services/automationService');
 
-const app = express();      
-app.use(express.json());                         
+const { initVoiceSocket } = require('./ws/ws/voiceSocket');
+
+const app = express();
+
+// Important derrière Railway
+app.set('trust proxy', 1);
+
+// Parsers
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// 🔴 ROUTES DE SANTÉ (OBLIGATOIRES POUR RAILWAY & TWILIO)
-app.get("/health", (req, res) => {
-  res.status(200).json({ ok: true, service: "railway-server" });
-});
-
-app.post("/api/automated/status", (req, res) => {
-  console.log("📞 TWILIO STATUS CALLBACK:", req.body);
-  res.sendStatus(200);
-});
-
-app.get("/api/automated/status", (req, res) => {
-  res.send("OK");
-});
-
-const PORT = process.env.PORT || 3000;
-
-// Middleware
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Static
 app.use(express.static('public'));
 
-// Logger middleware
+// Logger
 app.use((req, res, next) => {
   logger.info(`${req.method} ${req.url}`);
   next();
 });
 
-// Routes
+// Health (UNE SEULE FOIS)
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK', message: "Bot d'appel en ligne" });
+});
+
+// API routes
 app.use('/api/calls', callRoutes);
 app.use('/api/automated', automatedRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/bot', botControlRoutes);
 
-// Route de vérification
-app.get('/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Bot d\'appel en ligne' });
-});
-
-// Page d'accueil
+// Pages
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/public/index.html');
 });
 
-// Dashboard
 app.get('/dashboard', (req, res) => {
   res.sendFile(__dirname + '/public/dashboard.html');
 });
 
-// Gestion des erreurs
+// Error handler
 app.use((err, req, res, next) => {
   logger.error(err.stack);
   res.status(500).json({ error: 'Une erreur est survenue' });
 });
 
-// Démarrage du serveur
-app.listen(PORT, async () => {
-  logger.info(`🚀 Serveur démarré sur le port ${PORT}`);
-  console.log(`\n✅ Serveur en écoute sur http://localhost:${PORT}`);
-  console.log(`✅ Interface de gestion: http://localhost:${PORT}`);
-  
-  // Initialiser Google Sheets
-  const sheetsInitialized = await initGoogleSheets();
-  if (sheetsInitialized) {
-    console.log(`✅ Google Sheets connecté`);
-    
-    // Démarrer le système d'appels automatiques
-    startAutomation();
-    console.log(`✅ Système d'appels automatiques actif`);
-    console.log(`⏰ Horaires d'appels: ${process.env.CALL_START_HOUR}h - ${process.env.CALL_END_HOUR}h`);
-    console.log(`💬 Horaires de messages: ${process.env.MESSAGE_START_HOUR}h - ${process.env.MESSAGE_END_HOUR}h`);
-  } else {
-    console.log(`⚠️  Google Sheets non configuré - consultez GOOGLE_SHEETS_SETUP.md`);
+const PORT = process.env.PORT || 3000;
+
+// HTTP server (obligatoire pour WebSocket)
+const server = http.createServer(app);
+
+// WebSocket voice stream
+initVoiceSocket(server);
+
+// Start
+server.listen(PORT, async () => {
+  try {
+    logger.info(`🚀 Serveur démarré sur le port ${PORT}`);
+
+    const ok = await initGoogleSheets();
+    if (ok) {
+      logger.info('✅ Google Sheets connecté');
+
+      startAutomation();
+      logger.info('✅ Automation démarrée');
+
+      logger.info(`⏰ Appels: ${process.env.CALL_START_HOUR}h - ${process.env.CALL_END_HOUR}h`);
+      logger.info(`💬 Messages: ${process.env.MESSAGE_START_HOUR}h - ${process.env.MESSAGE_END_HOUR}h`);
+    } else {
+      logger.warn('⚠️ Google Sheets non configuré (voir GOOGLE_SHEETS_SETUP.md)');
+    }
+
+    logger.info('📞 Bot d’appel prêt');
+  } catch (e) {
+    logger.error('❌ Erreur au démarrage:', e.message);
   }
-  
-  logger.info(`📞 Bot d'appel IA prêt !`);
 });
 
 module.exports = app;

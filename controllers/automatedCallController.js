@@ -45,40 +45,30 @@ async function makeAutomatedCall(order) {
 }
 
 /**
- * Webhook vocal Twilio (début appel)
+ * Webhook vocal Twilio (début appel) — Media Streams (WSS)
  */
 async function handleVoiceWebhook(req, res) {
   const orderId = req.query.orderId;
-  const order = await OrderDB.getById(orderId);
-
   const response = new VoiceResponse();
 
-  if (!order) {
-    response.say({ language: 'fr-FR', voice: 'alice' },
-      "Désolé, cette commande est introuvable.");
-    response.hangup();
-    return res.type('text/xml').send(response.toString());
-  }
+  response.say(
+    { voice: 'alice', language: 'fr-FR' },
+    "Bonjour. Un instant s'il vous plaît."
+  );
 
-  response.say({ language: 'fr-FR', voice: 'alice' },
-    `Bonjour ${order.customer_name}. 
-     Je vous appelle concernant votre commande ${order.products}.
-     Souhaitez-vous confirmer, modifier ou annuler la commande ?`);
+  // BASE_URL: https://web-production-13730.up.railway.app
+  const base = process.env.BASE_URL || `https://${req.headers.host}`;
+  const wsBase = base.replace(/^https?:\/\//, 'wss://');
+  const wsUrl = `${wsBase}/ws/voice?orderId=${encodeURIComponent(orderId || '')}`;
 
-  response.gather({
-    input: 'speech',
-    language: 'fr-FR',
-    speechTimeout: 'auto',
-    speechModel: 'phone_call',
-    action: `/api/automated/respond?orderId=${order.id}`,
-    method: 'POST'
-  });
+  response.connect().stream({ url: wsUrl });
 
-  res.type('text/xml').send(response.toString());
+  res.type('text/xml');
+  res.send(response.toString());
 }
 
 /**
- * Réponse vocale client
+ * Réponse vocale client (legacy Gather — conservé mais non utilisé si Media Streams)
  */
 async function handleCustomerResponse(req, res) {
   const orderId = req.query.orderId;
@@ -137,7 +127,7 @@ async function handleCustomerResponse(req, res) {
 }
 
 /**
- * Confirmation OUI / NON annulation
+ * Confirmation OUI / NON annulation (legacy Gather)
  */
 async function handleCancelConfirmation(orderId, speech) {
   const response = new VoiceResponse();
