@@ -19,27 +19,6 @@ router.get('/', async (req, res) => {
 });
 
 /**
- * GET /api/orders/:id - Obtenir une commande spécifique
- */
-router.get('/:id', async (req, res) => {
-  try {
-    const order = await OrderDB.getById(req.params.id);
-    
-    if (!order) {
-      return res.status(404).json({ error: 'Commande non trouvée' });
-    }
-
-    // Récupérer les appels associés
-    const calls = await CallDB.getByOrderId(order.id);
-    
-    res.json({ ...order, calls });
-  } catch (error) {
-    logger.error('Erreur récupération commande:', error.message);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-/**
  * GET /api/orders/pending - Obtenir les commandes en attente
  */
 router.get('/status/pending', async (req, res) => {
@@ -61,6 +40,38 @@ router.post('/sync', async (req, res) => {
     res.json({ success: true, message: 'Synchronisation effectuée' });
   } catch (error) {
     logger.error('Erreur synchronisation:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Variante GET pour déclencher la synchro depuis le navigateur
+router.get('/sync', async (req, res) => {
+  try {
+    await syncOrders();
+    res.json({ success: true, message: 'Synchronisation effectuée' });
+  } catch (error) {
+    logger.error('Erreur synchronisation:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * GET /api/orders/:id - Obtenir une commande spécifique
+ */
+router.get('/:id', async (req, res) => {
+  try {
+    const order = await OrderDB.getById(req.params.id);
+    
+    if (!order) {
+      return res.status(404).json({ error: 'Commande non trouvée' });
+    }
+
+    // Récupérer les appels associés
+    const calls = await CallDB.getByOrderId(order.id);
+    
+    res.json({ ...order, calls });
+  } catch (error) {
+    logger.error('Erreur récupération commande:', error.message);
     res.status(500).json({ error: error.message });
   }
 });
