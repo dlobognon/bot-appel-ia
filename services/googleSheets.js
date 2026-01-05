@@ -15,40 +15,23 @@ let auth = null;
  */
 function normalizeIvorianPhone(phone) {
   if (!phone) return '';
-  
-  // Nettoyer le numéro (enlever espaces, tirets, etc.)
-  const cleaned = phone.toString().replace(/[\s\-\.()]/g, '');
-  
-  // Si commence déjà par +225, garder tel quel
-  if (cleaned.startsWith('+225')) {
-    return cleaned;
-  }
-  
-  // Si commence par 225 (sans +), ajouter le +
-  if (cleaned.startsWith('225') && cleaned.length === 13) {
-    return '+' + cleaned;
-  }
-  
-  // Extraire uniquement les chiffres
+  const cleaned = phone.toString().trim().replace(/[\s\-\.()]/g, '');
+
+  // Déjà E.164
+  if (cleaned.startsWith('+225')) return cleaned;
+
+  // Si commence par 225 (sans +)
+  if (cleaned.startsWith('225')) return '+' + cleaned;
+
   const digitsOnly = cleaned.replace(/\D/g, '');
-  
-  // Si 9 chiffres, ajouter 0 devant puis +225
-  if (digitsOnly.length === 9) {
-    return '+2250' + digitsOnly;
-  }
-  
-  // Si 10 chiffres, ajouter +225
-  if (digitsOnly.length === 10) {
-    return '+225' + digitsOnly;
-  }
-  
-  // Si commence par 0 et fait 10 chiffres
-  if (digitsOnly.startsWith('0') && digitsOnly.length === 10) {
-    return '+225' + digitsOnly;
-  }
-  
-  // Sinon retourner avec +225 par défaut
-  return '+225' + digitsOnly;
+
+  // Côte d'Ivoire (plan 2021): NSN 10 chiffres
+  if (digitsOnly.length === 10) return '+225' + digitsOnly;
+
+  // Ancien plan: 8 chiffres (best effort)
+  if (digitsOnly.length === 8) return '+225' + digitsOnly;
+
+  return digitsOnly ? ('+225' + digitsOnly) : '';
 }
 
 /**

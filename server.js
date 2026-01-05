@@ -7,10 +7,28 @@ const logger = require('./utils/logger');
 const callRoutes = require('./routes/callRoutes');
 const automatedRoutes = require('./routes/automatedRoutes');
 const orderRoutes = require('./routes/orderRoutes');
+const botControlRoutes = require('./routes/botControl');
 const { initGoogleSheets } = require('./services/googleSheets');
 const { startAutomation } = require('./services/automationService');
 
-const app = express();
+const app = express();      
+app.use(express.json());                         
+app.use(express.urlencoded({ extended: true }));
+
+// 🔴 ROUTES DE SANTÉ (OBLIGATOIRES POUR RAILWAY & TWILIO)
+app.get("/health", (req, res) => {
+  res.status(200).json({ ok: true, service: "railway-server" });
+});
+
+app.post("/api/automated/status", (req, res) => {
+  console.log("📞 TWILIO STATUS CALLBACK:", req.body);
+  res.sendStatus(200);
+});
+
+app.get("/api/automated/status", (req, res) => {
+  res.send("OK");
+});
+
 const PORT = process.env.PORT || 3000;
 
 // Middleware
@@ -29,6 +47,7 @@ app.use((req, res, next) => {
 app.use('/api/calls', callRoutes);
 app.use('/api/automated', automatedRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/bot', botControlRoutes);
 
 // Route de vérification
 app.get('/health', (req, res) => {
@@ -38,6 +57,11 @@ app.get('/health', (req, res) => {
 // Page d'accueil
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/public/index.html');
+});
+
+// Dashboard
+app.get('/dashboard', (req, res) => {
+  res.sendFile(__dirname + '/public/dashboard.html');
 });
 
 // Gestion des erreurs

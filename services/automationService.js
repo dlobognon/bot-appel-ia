@@ -1,8 +1,10 @@
+
 const cron = require('node-cron');
 const logger = require('../utils/logger');
 const { getOrders, updateOrderStatus, addNote } = require('./googleSheets');
 const { OrderDB, CallDB } = require('../config/database');
 const { isCallTimeAllowed, isMessageTimeAllowed, logTimeStatus } = require('../utils/timeManager');
+const { isBotEnabled } = require('../config/botState');
 const { makeAutomatedCall, sendAutomatedMessage } = require('../controllers/automatedCallController');
 
 let isProcessing = false;
@@ -46,9 +48,18 @@ async function syncOrders() {
         });
         
         logger.info(`✅ Nouvelle commande importée: ${sheetOrder.customer_name} - ${sheetOrder.products}`);
-        
-        // NE PLUS marquer comme imported dans Google Sheets
-        // Le statut reste "neutre" ou ce qu'il était, pour permettre la réimportation
+      }
+    }
+
+    // 🔁 Synchroniser les suppressions / annulations depuis Google Sheets
+    for (const dbOrder of existingOrders) {
+      const still = sheetOrders.find(s => s.sheet_row === dbOrder.sheet_row);
+      if (!still) {
+        await OrderDB.updateStatus(dbOrder.id, 'deleted', 'Supprimée dans Google Sheets');
+        logger.info(`🗑️ Commande supprimée dans Google Sheets → supprimée dans le bot (id=${dbOrder.id})`);
+      } else if (['annulee','annulé','annule','cancelled','canceled'].includes((still.status||'').toLowerCase())) {
+        await OrderDB.updateStatus(dbOrder.id, 'cancelled', 'Annulée dans Google Sheets');
+        logger.info(`🚫 Commande annulée dans Google Sheets → annulée dans le bot (id=${dbOrder.id})`);
       }
     }
     
@@ -65,6 +76,12 @@ async function syncOrders() {
 async function processaPendingOrders() {
   if (isProcessing) {
     logger.info('⏳ Traitement déjà en cours, passage...');
+    return;
+  }
+
+  // Bot OFF => ne rien envoyer
+  if (!isBotEnabled()) {
+    logger.info('⛔ Bot OFF — aucun appel / message envoyé');
     return;
   }
 

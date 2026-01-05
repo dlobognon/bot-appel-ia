@@ -119,4 +119,56 @@ router.get('/stats/summary', async (req, res) => {
   }
 });
 
+/**
+ * POST /api/orders/:id/cancel - Annuler une commande depuis le dashboard
+ */
+router.post('/:id/cancel', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const order = await OrderDB.getById(id);
+    if (!order) return res.status(404).json({ error: 'Commande introuvable' });
+
+    await OrderDB.updateStatus(id, 'cancelled', 'Annulée depuis le dashboard');
+
+    // Mettre à jour Google Sheets (colonne statut) si possible
+    try {
+      const { updateOrderStatus } = require('../services/googleSheets');
+      await updateOrderStatus(order.sheet_row, 'annulee', 'Annulée depuis le dashboard');
+    } catch (e) {
+      logger.warn('⚠️ Google Sheets (cancel) non mis à jour: ' + e.message);
+    }
+
+    res.json({ success: true, id, status: 'cancelled' });
+  } catch (error) {
+    logger.error('Erreur annulation commande:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * DELETE /api/orders/:id - Supprimer une commande depuis le dashboard
+ * (On marque "deleted" au lieu de supprimer physiquement)
+ */
+router.delete('/:id', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const order = await OrderDB.getById(id);
+    if (!order) return res.status(404).json({ error: 'Commande introuvable' });
+
+    await OrderDB.updateStatus(id, 'deleted', 'Supprimée depuis le dashboard');
+
+    try {
+      const { updateOrderStatus } = require('../services/googleSheets');
+      await updateOrderStatus(order.sheet_row, 'supprimee', 'Supprimée depuis le dashboard');
+    } catch (e) {
+      logger.warn('⚠️ Google Sheets (delete) non mis à jour: ' + e.message);
+    }
+
+    res.json({ success: true, id, status: 'deleted' });
+  } catch (error) {
+    logger.error('Erreur suppression commande:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;
