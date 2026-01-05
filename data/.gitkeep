@@ -1,0 +1,4 @@
+# Ce dossier contient la base de données SQLite
+# Le fichier orders.db sera créé automatiquement au démarrage du serveur
+
+*.db

@@ -1,0 +1,261 @@
+const { google } = require('googleapis');
+const fs = require('fs');
+const path = require('path');
+const logger = require('../utils/logger');
+
+let sheets = null;
+let auth = null;
+
+/**
+ * Normaliser un numéro de téléphone ivoirien
+ * - Si 9 chiffres : ajoute 0 devant puis +225
+ * - Si 10 chiffres : ajoute +225
+ * - Si commence déjà par +225 : garde tel quel
+ * - Sinon : retourne tel quel
+ */
+function normalizeIvorianPhone(phone) {
+  if (!phone) return '';
+  
+  // Nettoyer le numéro (enlever espaces, tirets, etc.)
+  const cleaned = phone.toString().replace(/[\s\-\.()]/g, '');
+  
+  // Si commence déjà par +225, garder tel quel
+  if (cleaned.startsWith('+225')) {
+    return cleaned;
+  }
+  
+  // Si commence par 225 (sans +), ajouter le +
+  if (cleaned.startsWith('225') && cleaned.length === 13) {
+    return '+' + cleaned;
+  }
+  
+  // Extraire uniquement les chiffres
+  const digitsOnly = cleaned.replace(/\D/g, '');
+  
+  // Si 9 chiffres, ajouter 0 devant puis +225
+  if (digitsOnly.length === 9) {
+    return '+2250' + digitsOnly;
+  }
+  
+  // Si 10 chiffres, ajouter +225
+  if (digitsOnly.length === 10) {
+    return '+225' + digitsOnly;
+  }
+  
+  // Si commence par 0 et fait 10 chiffres
+  if (digitsOnly.startsWith('0') && digitsOnly.length === 10) {
+    return '+225' + digitsOnly;
+  }
+  
+  // Sinon retourner avec +225 par défaut
+  return '+225' + digitsOnly;
+}
+
+/**
+ * Initialiser l'authentification Google Sheets
+ */
+async function initGoogleSheets() {
+  try {
+    const credentialsPath = process.env.GOOGLE_CREDENTIALS_PATH || './credentials.json';
+    
+    if (!fs.existsSync(credentialsPath)) {
+      logger.error('Fichier credentials.json non trouvé. Consultez GOOGLE_SHEETS_SETUP.md');
+      return false;
+    }
+
+    const credentials = JSON.parse(fs.readFileSync(credentialsPath, 'utf8'));
+    
+    auth = new google.auth.GoogleAuth({
+      credentials,
+      scopes: ['https://www.googleapis.com/auth/spreadsheets']
+    });
+
+    sheets = google.sheets({ version: 'v4', auth });
+    logger.info('✅ Google Sheets API initialisée');
+    return true;
+  } catch (error) {
+    logger.error('Erreur initialisation Google Sheets:', error.message);
+    return false;
+  }
+}
+
+/**
+ * Récupérer toutes les commandes depuis Google Sheets
+ */
+async function getOrders() {
+  try {
+    if (!sheets) {
+      await initGoogleSheets();
+    }
+
+    const spreadsheetId = process.env.GOOGLE_SHEET_ID;
+    
+    // Lire les données de la feuille (ajustez le range selon votre structure)
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: 'Commandes!A2:I', // A jusqu'à I (9 colonnes)
+    });
+
+    const rows = response.data.values || [];
+    
+    // LOG DEBUG: Afficher les données brutes
+    logger.info(`📋 Nombre total de lignes dans le sheet: ${rows.length}`);
+    if (rows.length > 0) {
+      logger.info(`🔍 Première ligne (exemple): ${JSON.stringify(rows[0])}`);
+    }
+    
+    // Transformer les lignes en objets
+    const allOrders = rows.map((row, index) => {
+      const rawPhone = row[2] || '';
+      const normalizedPhone = normalizeIvorianPhone(rawPhone);
+      
+      return {
+        sheet_row: index + 2, // +2 car on commence à la ligne 2
+        order_date: row[0] || new Date().toISOString(), // Col A
+        customer_name: row[1] || '', // Col B
+        customer_phone: normalizedPhone, // Col C
+        delivery_address: row[3] || '', // Col D
+        notes: row[4] || '', // Col E
+        products: row[5] || '', // Col F
+        price: row[6] || '', // Col G
+        status: (row[7] || 'neutre').toLowerCase().trim(), // Col H (Statuts)
+        comments: row[8] || '' // Col I (Comments bot - peut être vide)
+      };
+    });
+    
+    // LOG DEBUG: Afficher tous les statuts trouvés
+    const statuts = allOrders.map(o => o.status);
+    logger.info(`📊 Statuts trouvés: ${JSON.stringify([...new Set(statuts)])}`);
+    
+    const orders = allOrders.filter(order => {
+      // Filtrer uniquement les commandes avec statut "neutre" ou "injoignable"
+      const validStatuses = ['neutre', 'injoignable'];
+      const isValid = validStatuses.includes(order.status) && order.customer_phone;
+      if (!isValid && order.customer_name) {
+        logger.info(`⏭️ Commande ignorée: ${order.customer_name} (statut: "${order.status}", tel: ${order.customer_phone ? 'oui' : 'non'})`);
+      }
+      return isValid;
+    });
+
+    logger.info(`📊 ${orders.length} commandes récupérées depuis Google Sheets`);
+    return orders;
+  } catch (error) {
+    logger.error('Erreur récupération commandes:', error.message);
+    throw error;
+  }
+}
+
+/**
+ * Mettre à jour le statut d'une commande dans Google Sheets
+ */
+async function updateOrderStatus(rowNumber, status, notes = '') {
+  try {
+    if (!sheets) {
+      await initGoogleSheets();
+    }
+
+    const spreadsheetId = process.env.GOOGLE_SHEET_ID;
+    
+    // Mettre à jour les colonnes H (statut) et I (comments)
+    await sheets.spreadsheets.values.update({
+      spreadsheetId,
+      range: `Commandes!H${rowNumber}:I${rowNumber}`,
+      valueInputOption: 'RAW',
+      resource: {
+        values: [[status, notes]]
+      }
+    });
+
+    logger.info(`✅ Statut mis à jour pour la ligne ${rowNumber}: ${status}`);
+  } catch (error) {
+    logger.error('Erreur mise à jour statut:', error.message);
+    throw error;
+  }
+}
+
+/**
+ * Ajouter une note à une commande
+ */
+async function addNote(rowNumber, note) {
+  try {
+    if (!sheets) {
+      await initGoogleSheets();
+    }
+
+    const spreadsheetId = process.env.GOOGLE_SHEET_ID;
+    
+    // Lire la note existante en colonne I (comments)
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: `Commandes!I${rowNumber}`
+    });
+
+    const existingNote = response.data.values?.[0]?.[0] || '';
+    const newNote = existingNote 
+      ? `${existingNote}\n${new Date().toLocaleString('fr-FR')}: ${note}`
+      : `${new Date().toLocaleString('fr-FR')}: ${note}`;
+
+    // Mettre à jour
+    await sheets.spreadsheets.values.update({
+      spreadsheetId,
+      range: `Commandes!I${rowNumber}`,
+      valueInputOption: 'USER_ENTERED',
+      resource: {
+        values: [[newNote]]
+      }
+    });
+
+    logger.info(`✅ Note ajoutée à la ligne ${rowNumber}`);
+  } catch (error) {
+    logger.error('Erreur ajout note:', error.message);
+    throw error;
+  }
+}
+
+/**
+ * Créer une structure de feuille si elle n'existe pas
+ */
+async function setupSheetStructure() {
+  try {
+    if (!sheets) {
+      await initGoogleSheets();
+    }
+
+    const spreadsheetId = process.env.GOOGLE_SHEET_ID;
+    
+    // Créer les en-têtes si la feuille est vide
+    const headers = [
+      'Date',      // A
+      'Nom du client', // B
+      'Numéro',    // C
+      'Lieu de livraison', // D
+      'Note',      // E
+      'Produits',  // F
+      'Prix',      // G
+      'Statuts',   // H (statut: neutre, injoignable, confirmé, etc.)
+      'Comments'   // I (notes du bot)
+    ];
+
+    await sheets.spreadsheets.values.update({
+      spreadsheetId,
+      range: 'Commandes!A1:I1',
+      valueInputOption: 'USER_ENTERED',
+      resource: {
+        values: [headers]
+      }
+    });
+
+    logger.info('✅ Structure de la feuille configurée');
+  } catch (error) {
+    logger.error('Erreur configuration feuille:', error.message);
+  }
+}
+
+module.exports = {
+  initGoogleSheets,
+  getOrders,
+  updateOrderStatus,
+  addNote,
+  setupSheetStructure,
+  normalizeIvorianPhone
+};
