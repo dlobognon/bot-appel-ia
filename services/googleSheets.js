@@ -140,17 +140,11 @@ async function getOrders() {
     const statuts = allOrders.map(o => o.status);
     logger.info(`📊 Statuts trouvés: ${JSON.stringify([...new Set(statuts)])}`);
     
-    const orders = allOrders.filter(order => {
-      // Filtrer uniquement les commandes avec statut "neutre" ou "injoignable"
-      const validStatuses = ['neutre', 'injoignable'];
-      const isValid = validStatuses.includes(order.status) && order.customer_phone;
-      if (!isValid && order.customer_name) {
-        logger.info(`⏭️ Commande ignorée: ${order.customer_name} (statut: "${order.status}", tel: ${order.customer_phone ? 'oui' : 'non'})`);
-      }
-      return isValid;
-    });
+    // Retourner TOUTES les commandes avec téléphone
+    // Le filtrage par statut se fait maintenant dans syncOrders()
+    const orders = allOrders.filter(order => order.customer_phone);
 
-    logger.info(`📊 ${orders.length} commandes récupérées depuis Google Sheets`);
+    logger.info(`📊 ${orders.length} commandes avec téléphone récupérées depuis Google Sheets`);
     return orders;
   } catch (error) {
     logger.error('Erreur récupération commandes:', error.message);
