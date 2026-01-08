@@ -1,6 +1,6 @@
 const cron = require('node-cron');
 const logger = require('../utils/logger');
-const { getOrders, updateOrderStatus, addNote } = require('./googleSheets');
+const { getOrders, updateOrderStatus } = require('./googleSheets');
 const { OrderDB } = require('../config/database');
 const { isCallTimeAllowed, isMessageTimeAllowed, logTimeStatus } = require('../utils/timeManager');
 const { isBotEnabled } = require('../config/botState');
@@ -9,29 +9,24 @@ const { makeAutomatedCall, sendAutomatedMessage } = require('../controllers/auto
 let isProcessing = false;
 
 /**
- * 🔄 Synchroniser les commandes depuis Google Sheets
+ * 🔄 Synchronisation Google Sheets → Base locale
  */
 async function syncOrders() {
   try {
     logger.info('🔄 syncOrders lancé');
 
     const sheetOrders = await getOrders();
-    const existingOrders = await OrderDB.getAll();
+    const dbOrders = await OrderDB.getAll();
+
+    // Index rapide
+    const dbByRow = new Map(dbOrders.map(o => [o.sheet_row, o]));
 
     for (const sheetOrder of sheetOrders) {
-      console.log('🧾 SHEET ORDER:', sheetOrder);
+      if (!sheetOrder.sheet_row || !sheetOrder.customer_phone) continue;
 
-      const exists = existingOrders.find(
-        o => o.sheet_row === sheetOrder.sheet_row
-      );
+      const existing = dbByRow.get(sheetOrder.sheet_row);
 
-      if (!exists && sheetOrder.customer_phone) {
-        const statusSheet = (sheetOrder.status || '').toString().trim().toLowerCase();
-
-        logger.info(
-          `📥 Import commande: ${sheetOrder.customer_name} | statut sheet="${statusSheet}"`
-        );
-
+      if (!existing) {
         const orderId = await OrderDB.create({
           sheet_row: sheetOrder.sheet_row,
           customer_name: sheetOrder.customer_name,
@@ -42,42 +37,34 @@ async function syncOrders() {
           status: 'pending'
         });
 
-        logger.info(`✅ Commande importée ID=${orderId}`);
-      }
-    }
-
-    // 🔁 Synchroniser suppressions / annulations
-    for (const dbOrder of existingOrders) {
-      const stillExists = sheetOrders.find(
-        s => s.sheet_row === dbOrder.sheet_row
-      );
-
-      if (!stillExists) {
-        await OrderDB.updateStatus(dbOrder.id, 'deleted', 'Supprimée dans Google Sheets');
-        logger.info(`🗑️ Commande supprimée Sheet → Bot (id=${dbOrder.id})`);
+        logger.info(`✅ Commande importée (${orderId}) ${sheetOrder.customer_name}`);
         continue;
       }
 
-      const sheetStatus = (stillExists.status || '').toLowerCase();
-      if (['annulee', 'annulé', 'annule', 'cancelled', 'canceled'].includes(sheetStatus)) {
-        await OrderDB.updateStatus(dbOrder.id, 'cancelled', 'Annulée dans Google Sheets');
-        logger.info(`🚫 Commande annulée Sheet → Bot (id=${dbOrder.id})`);
+      // 🔁 Mise à jour statut si annulée dans Sheets
+      const sheetStatus = (sheetOrder.status || '').toLowerCase();
+      if (
+        ['annule', 'annulé', 'annulee', 'cancelled', 'canceled'].includes(sheetStatus) &&
+        existing.status !== 'cancelled'
+      ) {
+        await OrderDB.updateStatus(existing.id, 'cancelled', 'Annulée dans Google Sheets');
+        logger.info(`🚫 Annulation synchronisée (id=${existing.id})`);
       }
     }
 
-  } catch (error) {
-    logger.error('❌ Erreur syncOrders:', error);
+  } catch (err) {
+    logger.error('❌ Erreur syncOrders:', err);
   }
 }
 
 /**
- * 📞 Traiter les commandes en attente
+ * 📞 Traitement des commandes en attente
  */
 async function processaPendingOrders() {
   if (isProcessing) return;
 
   if (!isBotEnabled()) {
-    logger.info('⛔ Bot OFF — aucun appel/message');
+    logger.info('⛔ Bot OFF — automation suspendue');
     return;
   }
 
@@ -87,16 +74,14 @@ async function processaPendingOrders() {
 
     const pendingOrders = await OrderDB.getPending();
 
-    if (pendingOrders.length === 0) {
-      logger.info('📭 Aucune commande en attente');
+    if (!pendingOrders.length) {
+      logger.info('📭 Aucune commande à traiter');
       return;
     }
 
-    logger.info(`📋 ${pendingOrders.length} commande(s) à traiter`);
-
     for (const order of pendingOrders) {
       if (order.call_attempts >= 3) {
-        await OrderDB.updateStatus(order.id, 'failed', 'Maximum tentatives atteint');
+        await OrderDB.updateStatus(order.id, 'failed', 'Max tentatives atteint');
         await updateOrderStatus(order.sheet_row, 'failed', 'Client injoignable');
         continue;
       }
@@ -105,29 +90,30 @@ async function processaPendingOrders() {
         logger.info(`📞 Appel IA → ${order.customer_name}`);
         await makeAutomatedCall(order);
         await new Promise(r => setTimeout(r, 30000));
-      } else if (isMessageTimeAllowed()) {
+      } 
+      else if (isMessageTimeAllowed()) {
         logger.info(`💬 Message IA → ${order.customer_name}`);
         await sendAutomatedMessage(order);
         await new Promise(r => setTimeout(r, 10000));
       }
     }
 
-  } catch (error) {
-    logger.error('❌ Erreur processPendingOrders:', error);
+  } catch (err) {
+    logger.error('❌ Erreur processaPendingOrders:', err);
   } finally {
     isProcessing = false;
   }
 }
 
 /**
- * ▶️ Démarrage de l'automation
+ * ▶️ Démarrage automation
  */
 function startAutomation() {
   logger.info('🤖 Automation démarrée');
 
-  const checkInterval = parseInt(process.env.CHECK_INTERVAL) || 5;
+  const interval = parseInt(process.env.CHECK_INTERVAL) || 5;
 
-  cron.schedule(`*/${checkInterval} * * * *`, async () => {
+  cron.schedule(`*/${interval} * * * *`, async () => {
     await syncOrders();
     await processaPendingOrders();
   });
@@ -139,7 +125,7 @@ function startAutomation() {
 }
 
 /**
- * ℹ️ Status automation
+ * ℹ️ Statut automation
  */
 function getAutomationStatus() {
   return {
