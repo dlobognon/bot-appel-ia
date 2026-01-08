@@ -61,7 +61,7 @@ async function processaPendingOrders() {
     isProcessing = true;
     logTimeStatus();
 
-    const pendingOrders = await OrderDB.getPending();
+    const pendingOrders = await OrderDB.getAll();
 
     if (!pendingOrders.length) {
       logger.info('📭 Aucune commande à traiter');
