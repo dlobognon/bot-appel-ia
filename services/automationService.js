@@ -17,17 +17,13 @@ async function syncOrders() {
 
     const sheetOrders = await getOrders();
     const dbOrders = await OrderDB.getAll();
-
-    // Index rapide
-    const dbByRow = new Map(dbOrders.map(o => [o.sheet_row, o]));
+    const dbByRow = new Map(dbOrders.map(o => o.sheet_row));
 
     for (const sheetOrder of sheetOrders) {
       if (!sheetOrder.sheet_row || !sheetOrder.customer_phone) continue;
 
-      const existing = dbByRow.get(sheetOrder.sheet_row);
-
-      if (!existing) {
-        const orderId = await OrderDB.create({
+      if (!dbByRow.has(sheetOrder.sheet_row)) {
+        await OrderDB.create({
           sheet_row: sheetOrder.sheet_row,
           customer_name: sheetOrder.customer_name,
           customer_phone: sheetOrder.customer_phone,
@@ -37,25 +33,18 @@ async function syncOrders() {
           status: 'pending'
         });
 
-        logger.info(`✅ Commande importée (${orderId}) ${sheetOrder.customer_name}`);
-        continue;
-      }
-
-      // 🔁 Mise à jour statut si annulée dans Sheets
-      const sheetStatus = (sheetOrder.status || '').toLowerCase();
-      if (
-        ['annule', 'annulé', 'annulee', 'cancelled', 'canceled'].includes(sheetStatus) &&
-        existing.status !== 'cancelled'
-      ) {
-        await OrderDB.updateStatus(existing.id, 'cancelled', 'Annulée dans Google Sheets');
-        logger.info(`🚫 Annulation synchronisée (id=${existing.id})`);
+        logger.info(`✅ Import commande sheet_row=${sheetOrder.sheet_row}`);
       }
     }
+
+    // ❗ ON NE SUPPRIME PLUS AUTOMATIQUEMENT
+    // Les suppressions se font UNIQUEMENT via dashboard ou appel vocal
 
   } catch (err) {
     logger.error('❌ Erreur syncOrders:', err);
   }
 }
+
 
 /**
  * 📞 Traitement des commandes en attente

@@ -4,19 +4,18 @@ const logger = require('../utils/logger');
 
 const dbPath = path.join(__dirname, '../data/orders.db');
 
-// Créer la connexion à la base de données
+// Connexion DB
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
-    logger.error('Erreur de connexion à la base de données:', err);
+    logger.error('Erreur de connexion DB:', err);
   } else {
-    logger.info('Connecté à la base de données SQLite');
+    logger.info('Connecté à la base SQLite');
     initDatabase();
   }
 });
 
-// Initialiser les tables
+// Initialisation tables
 function initDatabase() {
-  // Table des commandes
   db.run(`
     CREATE TABLE IF NOT EXISTS orders (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -34,13 +33,8 @@ function initDatabase() {
       created_at TEXT DEFAULT CURRENT_TIMESTAMP,
       updated_at TEXT DEFAULT CURRENT_TIMESTAMP
     )
-  `, (err) => {
-    if (err) {
-      logger.error('Erreur création table orders:', err);
-    }
-  });
+  `);
 
-  // Table des appels
   db.run(`
     CREATE TABLE IF NOT EXISTS calls (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -56,13 +50,8 @@ function initDatabase() {
       call_date TEXT NOT NULL,
       FOREIGN KEY (order_id) REFERENCES orders(id)
     )
-  `, (err) => {
-    if (err) {
-      logger.error('Erreur création table calls:', err);
-    }
-  });
+  `);
 
-  // Table de conversation (pour l'IA)
   db.run(`
     CREATE TABLE IF NOT EXISTS conversations (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -71,25 +60,42 @@ function initDatabase() {
       content TEXT NOT NULL,
       timestamp TEXT DEFAULT CURRENT_TIMESTAMP
     )
-  `, (err) => {
-    if (err) {
-      logger.error('Erreur création table conversations:', err);
-    }
-  });
+  `);
 }
 
-// Fonctions utilitaires pour les commandes
+// ======================
+// ORDER DB
+// ======================
 const OrderDB = {
-  // Créer une nouvelle commande
+  // ➕ CREATE
   create: (orderData) => {
     return new Promise((resolve, reject) => {
-      const { sheet_row, customer_name, customer_phone, delivery_address, products, order_date } = orderData;
-      
+      const {
+        sheet_row,
+        customer_name,
+        customer_phone,
+        delivery_address,
+        products,
+        order_date,
+        status = 'pending'
+      } = orderData;
+
       db.run(
-        `INSERT INTO orders (sheet_row, customer_name, customer_phone, delivery_address, products, order_date)
-         VALUES (?, ?, ?, ?, ?, ?)`,
-        [sheet_row, customer_name, customer_phone, delivery_address, products, order_date],
-        function(err) {
+        `
+        INSERT INTO orders
+        (sheet_row, customer_name, customer_phone, delivery_address, products, order_date, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        `,
+        [
+          sheet_row,
+          customer_name,
+          customer_phone,
+          delivery_address,
+          products,
+          order_date,
+          status
+        ],
+        function (err) {
           if (err) reject(err);
           else resolve(this.lastID);
         }
@@ -97,11 +103,36 @@ const OrderDB = {
     });
   },
 
-  // Récupérer toutes les commandes en attente
+  // ➕ GET ALL (🚨 CORRECTION CLÉ)
+  getAll: (limit = 100) => {
+    return new Promise((resolve, reject) => {
+      db.all(
+        `
+        SELECT *
+        FROM orders
+        WHERE status != 'deleted'
+        ORDER BY created_at DESC
+        LIMIT ?
+        `,
+        [limit],
+        (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows);
+        }
+      );
+    });
+  },
+
+  // GET PENDING
   getPending: () => {
     return new Promise((resolve, reject) => {
       db.all(
-        `SELECT * FROM orders WHERE status IN ('pending', 'retry') ORDER BY created_at ASC`,
+        `
+        SELECT *
+        FROM orders
+        WHERE status IN ('pending', 'retry')
+        ORDER BY created_at ASC
+        `,
         [],
         (err, rows) => {
           if (err) reject(err);
@@ -111,25 +142,29 @@ const OrderDB = {
     });
   },
 
-  // Récupérer une commande par ID
+  // GET BY ID
   getById: (id) => {
     return new Promise((resolve, reject) => {
-      db.get(`SELECT * FROM orders WHERE id = ?`, [id], (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
-      });
+      db.get(
+        `SELECT * FROM orders WHERE id = ?`,
+        [id],
+        (err, row) => {
+          if (err) reject(err);
+          else resolve(row);
+        }
+      );
     });
   },
 
-  // Mettre à jour le statut d'une commande
+  // UPDATE STATUS
   updateStatus: (id, status, notes = null) => {
     return new Promise((resolve, reject) => {
-      const query = notes 
+      const query = notes
         ? `UPDATE orders SET status = ?, notes = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`
         : `UPDATE orders SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`;
-      
+
       const params = notes ? [status, notes, id] : [status, id];
-      
+
       db.run(query, params, (err) => {
         if (err) reject(err);
         else resolve();
@@ -137,16 +172,18 @@ const OrderDB = {
     });
   },
 
-  // Incrémenter le nombre de tentatives d'appel
-  incrementCallAttempts: (id, callStatus) => {
+  // INCREMENT CALL ATTEMPTS
+  incrementCallAttempts: (id, callStatus = null) => {
     return new Promise((resolve, reject) => {
       db.run(
-        `UPDATE orders SET 
-         call_attempts = call_attempts + 1,
-         last_call_date = CURRENT_TIMESTAMP,
-         last_call_status = ?,
-         updated_at = CURRENT_TIMESTAMP
-         WHERE id = ?`,
+        `
+        UPDATE orders SET
+          call_attempts = call_attempts + 1,
+          last_call_date = CURRENT_TIMESTAMP,
+          last_call_status = ?,
+          updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+        `,
         [callStatus, id],
         (err) => {
           if (err) reject(err);
@@ -154,34 +191,24 @@ const OrderDB = {
         }
       );
     });
-  },
-
-  // Obtenir toutes les commandes
-  getAll: (limit = 100) => {
-    return new Promise((resolve, reject) => {
-      db.all(
-        `SELECT * FROM orders ORDER BY created_at DESC LIMIT ?`,
-        [limit],
-        (err, rows) => {
-          if (err) reject(err);
-          else resolve(rows);
-        }
-      );
-    });
   }
 };
 
-// Fonctions pour les appels
+// ======================
+// CALL DB
+// ======================
 const CallDB = {
   create: (callData) => {
     return new Promise((resolve, reject) => {
       const { order_id, call_sid, phone_number, call_date } = callData;
-      
+
       db.run(
-        `INSERT INTO calls (order_id, call_sid, phone_number, call_date)
-         VALUES (?, ?, ?, ?)`,
+        `
+        INSERT INTO calls (order_id, call_sid, phone_number, call_date)
+        VALUES (?, ?, ?, ?)
+        `,
         [order_id, call_sid, phone_number, call_date],
-        function(err) {
+        function (err) {
           if (err) reject(err);
           else resolve(this.lastID);
         }
@@ -191,9 +218,11 @@ const CallDB = {
 
   update: (call_sid, updateData) => {
     return new Promise((resolve, reject) => {
-      const fields = Object.keys(updateData).map(key => `${key} = ?`).join(', ');
+      const fields = Object.keys(updateData)
+        .map(key => `${key} = ?`)
+        .join(', ');
       const values = [...Object.values(updateData), call_sid];
-      
+
       db.run(
         `UPDATE calls SET ${fields} WHERE call_sid = ?`,
         values,
@@ -219,14 +248,16 @@ const CallDB = {
   }
 };
 
-// Fonctions pour les conversations
+// ======================
+// CONVERSATION DB
+// ======================
 const ConversationDB = {
   add: (call_sid, role, content) => {
     return new Promise((resolve, reject) => {
       db.run(
         `INSERT INTO conversations (call_sid, role, content) VALUES (?, ?, ?)`,
         [call_sid, role, content],
-        function(err) {
+        function (err) {
           if (err) reject(err);
           else resolve(this.lastID);
         }

@@ -10,7 +10,8 @@ const { syncOrders, getAutomationStatus } = require('../services/automationServi
 router.get('/', async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 100;
-    const orders = await OrderDB.getAll(limit);
+    const orders = await OrderDB.getAll(limit, false);
+
     res.json(orders);
   } catch (error) {
     logger.error('Erreur récupération commandes:', error.message);
