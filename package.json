@@ -33,7 +33,7 @@
     "sqlite3": "^5.1.7",
     "twilio": "^4.19.0",
     "winston": "^3.11.0",
-    "ws": "^8.18.3"
+    "ws": "^8.19.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
