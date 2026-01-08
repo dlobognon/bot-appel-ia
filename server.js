@@ -14,9 +14,6 @@ const botControlRoutes = require('./routes/botControl');
 
 const { initGoogleSheets } = require('./services/googleSheets');
 const { startAutomation } = require('./services/automationService');
-
-const { initVoiceSocket } = require('./ws/ws/voiceSocket');
-
 const app = express();
 
 // Important derrière Railway
@@ -38,7 +35,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Health (UNE SEULE FOIS)
+// Health
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: "Bot d'appel en ligne" });
 });
@@ -66,11 +63,21 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 3000;
 
-// HTTP server (obligatoire pour WebSocket)
+// HTTP server
 const server = http.createServer(app);
 
-// WebSocket voice stream
-initVoiceSocket(server);
+// ✅ Voice WebSocket (CHEMIN CORRECT: ws/ws/voiceSocket.js)
+let initVoiceSocket = null;
+try {
+  ({ initVoiceSocket } = require('./ws/ws/voiceSocket'));
+} catch (e) {
+  console.warn('⚠️ voiceSocket désactivé:', e.message);
+}
+
+// Brancher WS seulement si dispo
+if (initVoiceSocket) {
+  initVoiceSocket(server);
+}
 
 // Start
 server.listen(PORT, async () => {
