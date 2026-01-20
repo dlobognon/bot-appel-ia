@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Legancy Boutique - E-commerce Luxe</title>
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Meta Pixel Code -->
+  <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '889071523536237');
+    fbq('track', 'PageView');
+  </script>
+  <noscript>
+    <img height="1" width="1" style="display:none"
+         src="https://www.facebook.com/tr?id=889071523536237&ev=PageView&noscript=1"/>
+  </noscript>
+  <!-- End Meta Pixel Code -->
+</head>
+<body>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-inner">
+      <a class="brand" href="index.html" aria-label="Legancy Boutique - Accueil">
+        <img class="brand-logo" src="assets/logo.jpg" alt="Logo Legancy Boutique">
+        <div class="brand-text">
+          <div class="brand-name">LEGANCY BOUTIQUE</div>
+          <div class="brand-tag">Mode & Technologie</div>
+        </div>
+      </a>
+
+      <nav class="nav">
+        <a href="index.html">Accueil</a>
+        <a href="catalogue.html">Catalogue</a>
+        <a href="conditions.html">Conditions</a>
+        <div class="nav-item dropdown">
+          <button class="dropdown-toggle" type="button">Suivez-nous ▾</button>
+          <div class="dropdown-menu" role="menu">
+            <a role="menuitem" href="https://instagram.com/" target="_blank" rel="noopener">Instagram</a>
+            <a role="menuitem" href="https://facebook.com/" target="_blank" rel="noopener">Facebook</a>
+            <a role="menuitem" href="https://tiktok.com/" target="_blank" rel="noopener">TikTok</a>
+          </div>
+        </div>
+      </nav>
+
+      <div class="header-actions">
+        <a class="wa-btn" id="wa-header" href="#" target="_blank" rel="noopener">WhatsApp</a>
+        <button class="cart-btn" id="cart-btn" type="button">
+          Panier <span class="cart-count" id="cart-count">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- HERO SLIDER -->
+    <section class="hero-wrapper">
+      <div class="hero-slider">
+        <div class="hero-track" id="heroTrack"></div>
+        <div class="hero-controls">
+          <div id="heroDots"></div>
+        </div>
+      </div>
+      <div class="hero-content">
+        <div class="hero-left">
+          <h1 class="hero-title">Legancy Boutique</h1>
+          <p class="hero-subtitle">Découvrez notre sélection premium de produits pour un style de vie luxueux</p>
+          <div class="hero-buttons">
+            <a href="catalogue.html" class="primary-btn">Voir le Catalogue</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TITRE CATALOGUE ACCUEIL -->
+    <div class="hero-catalogue-title">
+      <h2>Best Sellers</h2>
+    </div>
+
+    <!-- BEST SELLERS (5-6 produits) -->
+    <section class="section">
+      <div id="bestSellersGrid" class="grid"></div>
+    </section>
+
+    <!-- CONTACT SECTION -->
+    <section class="section">
+      <div class="contact-card">
+        <div>
+          <h2>Vous avez une question ?</h2>
+          <p>Nos experts sont disponibles sur WhatsApp pour vous aider et répondre à tous vos besoins.</p>
+        </div>
+        <a class="primary-btn" id="wa-contact" href="#" target="_blank" rel="noopener">Contacter sur WhatsApp</a>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-grid">
+      <div class="footer-section">
+        <h3>À Propos</h3>
+        <ul>
+          <li><a href="#">Qui sommes-nous</a></li>
+          <li><a href="#">Notre histoire</a></li>
+          <li><a href="#">Valeurs</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h3>Produits</h3>
+        <ul>
+          <li><a href="catalogue.html">Catalogue complet</a></li>
+          <li><a href="catalogue.html?cat=Style">Style</a></li>
+          <li><a href="catalogue.html?cat=Santé">Santé</a></li>
+          <li><a href="catalogue.html?cat=Skin care">Skin Care</a></li>
+          <li><a href="catalogue.html?cat=Tech">Tech</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h3>Informations</h3>
+        <ul>
+          <li><a href="conditions.html">Conditions de vente</a></li>
+          <li><a href="conditions.html#delivery">Livraison</a></li>
+          <li><a href="conditions.html#payment">Paiement</a></li>
+          <li><a href="#">Politique de confidentialité</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h3>Contact</h3>
+        <ul>
+          <li><a href="#" id="footer-wa">WhatsApp</a></li>
+          <li><a href="#">Email</a></li>
+          <li><a href="#">Abidjan, Côte d'Ivoire</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 Legancy Boutique. Tous droits réservés. | Crafted with passion.</p>
+    </div>
+  </footer>
+
+  <!-- SCRIPTS -->
+  <script src="products.js"></script>
+  <script src="app.js"></script>
+  <script src="hero.js"></script>
+</body>
+</html>

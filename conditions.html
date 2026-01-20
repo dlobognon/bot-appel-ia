@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Conditions & Livraison - Legancy Boutique</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="cart-checkout-styles.css">
+</head>
+<body>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-inner">
+      <a class="brand" href="index.html" aria-label="Legancy Boutique - Accueil">
+        <img class="brand-logo" src="assets/logo.jpg" alt="Logo Legancy Boutique">
+        <div class="brand-text">
+          <div class="brand-name">LEGANCY BOUTIQUE</div>
+          <div class="brand-tag" data-i18n="brand.tag">Mode & Technologie</div>
+        </div>
+      </a>
+
+      <nav class="nav">
+        <a href="index.html" data-i18n="nav.home">Accueil</a>
+        <a href="catalogue.html" data-i18n="nav.catalogue">Catalogue</a>
+        <a href="conditions.html" data-i18n="nav.conditions">Conditions</a>
+        <div class="nav-item dropdown lang-dropdown">
+          <button class="dropdown-toggle" id="langToggle" type="button" aria-expanded="false" data-i18n="lang.toggle">Langue ▾</button>
+          <div class="dropdown-menu" role="menu">
+            <a class="lang-option" data-lang="fr" role="menuitem" href="#" data-i18n="lang.fr">Français</a>
+            <a class="lang-option" data-lang="en" role="menuitem" href="#" data-i18n="lang.en">English</a>
+            <a class="lang-option" data-lang="ar" role="menuitem" href="#" data-i18n="lang.ar">العربية</a>
+          </div>
+        </div>
+        <div class="nav-item dropdown">
+          <button class="dropdown-toggle" type="button" aria-expanded="false" data-i18n="nav.follow">Suivez-nous ▾</button>
+          <div class="dropdown-menu" role="menu">
+            <a role="menuitem" href="https://instagram.com/" target="_blank" rel="noopener">Instagram</a>
+            <a role="menuitem" href="https://facebook.com/" target="_blank" rel="noopener">Facebook</a>
+            <a role="menuitem" href="https://tiktok.com/" target="_blank" rel="noopener">TikTok</a>
+          </div>
+        </div>
+      </nav>
+
+      <div class="header-actions">
+        <a class="wa-btn" id="wa-header" href="#" target="_blank" rel="noopener" data-i18n="header.whatsapp">WhatsApp</a>
+        <button class="cart-btn" id="cart-btn" type="button">
+          <span data-i18n="header.cart">Panier</span> <span class="cart-count" id="cart-count">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- TITRE -->
+    <div class="hero-catalogue-title">
+      <h2 data-i18n="conditions.title">Conditions & Informations</h2>
+    </div>
+
+    <!-- CONTENU -->
+    <section class="section">
+      <div style="max-width: 900px; margin: 0 auto;">
+        
+        <!-- LIVRAISON -->
+        <div style="margin-bottom: 48px;">
+          <h2 style="font-size: 28px; font-weight: 900; margin: 0 0 24px 0;" data-i18n="conditions.delivery_title">🚚 Livraison</h2>
+          
+          <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 24px;">
+            <h3 style="margin-top: 0; color: #3b82f6;" data-i18n="conditions.delivery_rates">Tarifs de Livraison en Côte d'Ivoire</h3>
+            
+            <div style="margin: 20px 0;">
+              <div style="background: rgba(59, 130, 246, 0.1); border-left: 4px solid #3b82f6; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+                <strong data-i18n="conditions.zone_abidjan">📍 Abidjan (tous les quartiers)</strong><br>
+                <span style="font-size: 18px; color: #10b981; font-weight: 700;" data-i18n="conditions.free">Gratuit</span>
+                <p style="margin: 8px 0 0 0; color: rgba(255, 255, 255, 0.7); font-size: 13px;" data-i18n="conditions.abidjan_desc">Livraison partout à Abidjan sans frais supplémentaires</p>
+              </div>
+              
+              <div style="background: rgba(255, 255, 255, 0.03); border-left: 4px solid rgba(255, 255, 255, 0.15); padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+                <strong data-i18n="conditions.zone_special">📍 Bassam, Anyama, Zone Industrielle (Yopougon)</strong><br>
+                <span style="font-size: 18px; color: #f59e0b; font-weight: 700;">1 000 FCFA</span>
+                <p style="margin: 8px 0 0 0; color: rgba(255, 255, 255, 0.7); font-size: 13px;" data-i18n="conditions.special_desc">Livraison vers les zones limitrophes d'Abidjan</p>
+              </div>
+              
+              <div style="background: rgba(255, 255, 255, 0.03); border-left: 4px solid rgba(255, 255, 255, 0.15); padding: 16px; border-radius: 8px;">
+                <strong data-i18n="conditions.zone_outside">📍 Hors Abidjan</strong><br>
+                <span style="font-size: 18px; color: #f59e0b; font-weight: 700;">2 000 FCFA</span>
+                <p style="margin: 8px 0 0 0; color: rgba(255, 255, 255, 0.7); font-size: 13px;" data-i18n="conditions.outside_desc">Livraison en dehors de la région d'Abidjan</p>
+              </div>
+            </div>
+
+            <p style="color: rgba(255, 255, 255, 0.7); font-size: 14px; margin: 20px 0 0 0;">
+              <strong data-i18n="conditions.delivery_time_label">Délai de livraison :</strong> <span data-i18n="conditions.delivery_time_desc">Livraison sous 2-3 jours ouvrables après confirmation de la commande.</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- PAIEMENT -->
+        <div style="margin-bottom: 48px;" id="payment">
+          <h2 style="font-size: 28px; font-weight: 900; margin: 0 0 24px 0;" data-i18n="conditions.payment_title">💳 Paiement</h2>
+          
+          <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 24px;">
+            <h3 style="margin-top: 0; color: #3b82f6;" data-i18n="conditions.payment_method">Mode de Paiement</h3>
+            
+            <div style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.05)); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 12px; padding: 20px; margin: 20px 0;">
+              <strong style="font-size: 18px; color: #10b981;" data-i18n="conditions.payment_cod">✓ Paiement à la Livraison</strong>
+              <p style="margin: 12px 0 0 0; color: rgba(255, 255, 255, 0.8); line-height: 1.6;" data-i18n="conditions.payment_cod_desc">
+                Nous acceptons exclusivement le paiement à la livraison. Vous paierez votre commande directement au livreur, en espèces ou par mobile money.
+              </p>
+            </div>
+
+            <p style="color: rgba(255, 255, 255, 0.7); font-size: 14px; margin: 20px 0 0 0;">
+              <strong data-i18n="conditions.amount_label">Montant à payer :</strong> <span data-i18n="conditions.amount_desc">Prix total + frais de livraison (selon votre zone)</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- COMMANDES -->
+        <div style="margin-bottom: 48px;" id="delivery">
+          <h2 style="font-size: 28px; font-weight: 900; margin: 0 0 24px 0;" data-i18n="conditions.order_status_title">📦 Statut de Commande</h2>
+          
+          <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 24px;">
+            <h3 style="margin-top: 0; color: #3b82f6;" data-i18n="conditions.tracking_title">Suivi de Votre Commande</h3>
+            
+            <p style="color: rgba(255, 255, 255, 0.8); margin: 20px 0; line-height: 1.8;" data-i18n="conditions.tracking_intro">
+              Chaque commande a un statut qui suit sa progression :
+            </p>
+
+            <ul style="list-style: none; padding: 0; margin: 20px 0;">
+              <li style="padding: 12px 0; padding-left: 28px; position: relative; color: rgba(255, 255, 255, 0.8);">
+                <span style="position: absolute; left: 0; color: #3b82f6; font-weight: bold;">→</span>
+                <strong style="color: #3b82f6;" data-i18n="conditions.status_neutral">Neutre</strong> : <span data-i18n="conditions.status_neutral_desc">Commande reçue, en attente de confirmation</span>
+              </li>
+              <li style="padding: 12px 0; padding-left: 28px; position: relative; color: rgba(255, 255, 255, 0.8);">
+                <span style="position: absolute; left: 0; color: #3b82f6; font-weight: bold;">→</span>
+                <strong style="color: #10b981;" data-i18n="conditions.status_confirmed">Confirmée</strong> : <span data-i18n="conditions.status_confirmed_desc">Paiement reçu, commande en préparation</span>
+              </li>
+              <li style="padding: 12px 0; padding-left: 28px; position: relative; color: rgba(255, 255, 255, 0.8);">
+                <span style="position: absolute; left: 0; color: #3b82f6; font-weight: bold;">→</span>
+                <strong style="color: #f59e0b;" data-i18n="conditions.status_shipping">En livraison</strong> : <span data-i18n="conditions.status_shipping_desc">Colis en chemin vers vous</span>
+              </li>
+              <li style="padding: 12px 0; padding-left: 28px; position: relative; color: rgba(255, 255, 255, 0.8);">
+                <span style="position: absolute; left: 0; color: #3b82f6; font-weight: bold;">→</span>
+                <strong style="color: #10b981;" data-i18n="conditions.status_delivered">Livrée</strong> : <span data-i18n="conditions.status_delivered_desc">Commande reçue avec succès</span>
+              </li>
+            </ul>
+
+            <p style="color: rgba(255, 255, 255, 0.7); font-size: 14px; margin: 20px 0 0 0;">
+              <strong data-i18n="conditions.note_label">Note :</strong> <span data-i18n="conditions.note_tracking">Vous pouvez suivre votre commande en temps réel sur WhatsApp. Nous vous enverrons les mises à jour automatiquement.</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- CONDITIONS -->
+        <div style="margin-bottom: 48px;">
+          <h2 style="font-size: 28px; font-weight: 900; margin: 0 0 24px 0;" data-i18n="conditions.terms_title">📋 Conditions Générales</h2>
+          
+          <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 24px;">
+            <h3 style="margin-top: 0; color: #3b82f6;" data-i18n="conditions.returns_title">Retours & Échanges</h3>
+            <p style="color: rgba(255, 255, 255, 0.8); margin: 20px 0;" data-i18n="conditions.returns_desc">
+              Vous disposez de 7 jours à partir de la livraison pour retourner ou échanger un produit. Le produit doit être dans son état original et non utilisé.
+            </p>
+
+            <h3 style="margin-top: 28px; color: #3b82f6;" data-i18n="conditions.warranty_title">Garantie</h3>
+            <p style="color: rgba(255, 255, 255, 0.8); margin: 20px 0;" data-i18n="conditions.warranty_desc">
+              Tous nos produits bénéficient d'une garantie de qualité. En cas de défaut, nous proposons un remplacement ou un remboursement complet.
+            </p>
+
+            <h3 style="margin-top: 28px; color: #3b82f6;" data-i18n="conditions.privacy_title">Confidentialité</h3>
+            <p style="color: rgba(255, 255, 255, 0.8); margin: 20px 0;" data-i18n="conditions.privacy_desc">
+              Vos données personnelles sont traitées avec le plus grand respect et ne seront jamais partagées avec des tiers. Consultez notre politique de confidentialité pour plus de détails.
+            </p>
+
+            <h3 style="margin-top: 28px; color: #3b82f6;" data-i18n="conditions.support_title">Service Client</h3>
+            <p style="color: rgba(255, 255, 255, 0.8); margin: 20px 0;" data-i18n="conditions.support_desc">
+              Notre équipe est disponible du lundi au dimanche pour répondre à vos questions. Contactez-nous sur WhatsApp ou par email.
+            </p>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div style="text-align: center; margin-top: 48px;">
+          <a href="index.html" class="primary-btn" style="display: inline-block;" data-i18n="buttons.back_home">← Retour à l'accueil</a>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-grid">
+      <div class="footer-section">
+        <h3 data-i18n="footer.about">À Propos</h3>
+        <ul>
+          <li><a href="#">Qui sommes-nous</a></li>
+          <li><a href="#">Notre histoire</a></li>
+          <li><a href="#">Valeurs</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h3 data-i18n="footer.products">Produits</h3>
+        <ul>
+          <li><a href="catalogue.html" data-i18n="footer.catalogue_full">Catalogue complet</a></li>
+          <li><a href="catalogue.html?cat=Style">Style</a></li>
+          <li><a href="catalogue.html?cat=Santé">Santé</a></li>
+          <li><a href="catalogue.html?cat=Skin care">Skin Care</a></li>
+          <li><a href="catalogue.html?cat=Tech">Tech</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h3 data-i18n="footer.info">Informations</h3>
+        <ul>
+          <li><a href="conditions.html" data-i18n="footer.terms">Conditions de vente</a></li>
+          <li><a href="conditions.html#delivery" data-i18n="footer.delivery">Livraison</a></li>
+          <li><a href="conditions.html#payment" data-i18n="footer.payment">Paiement</a></li>
+          <li><a href="#" data-i18n="footer.privacy">Politique de confidentialité</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h3 data-i18n="footer.contact">Contact</h3>
+        <ul>
+          <li><a href="#" id="footer-wa" data-i18n="header.whatsapp">WhatsApp</a></li>
+          <li><a href="#">Email</a></li>
+          <li><a href="#" data-i18n="footer.location">Abidjan, Côte d'Ivoire</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p data-i18n="footer.copy">&copy; 2025 Legancy Boutique. Tous droits réservés. | Crafted with passion.</p>
+    </div>
+  </footer>
+
+  <script src="i18n.js"></script>
+  <script src="app.js"></script>
+  <script src="cart-modal.js"></script>
+  <script src="checkout-modal.js"></script>
+  <script src="cart-init.js"></script>
+</body>
+</html>
