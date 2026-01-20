@@ -1,0 +1,10 @@
+node_modules/
+.env
+*.log
+credentials.json
+data/orders.db
+.DS_Store
+dist/
+build/
+.vscode/
+logs/

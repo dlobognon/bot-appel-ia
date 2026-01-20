@@ -1,0 +1,6 @@
+{
+  "name": "Bot d'appel IA Twilio",
+  "description": "Bot automatisé pour appels clients avec Twilio, OpenAI et Google Sheets",
+  "builder": "nixpacks",
+  "startCommand": "node server.js"
+}
