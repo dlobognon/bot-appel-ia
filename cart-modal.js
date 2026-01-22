@@ -130,13 +130,14 @@ class CartModal {
       this.modal.querySelector('.checkout-btn').style.cursor = 'pointer';
       
       container.innerHTML = window.cart.items.map(item => `
-        <div class="cart-item" data-product-id="${item.id}">
+        <div class="cart-item" data-item-key="${item.key}" data-product-id="${item.id}">
           <div class="cart-item-image">
             <img src="${item.image}" alt="${item.name}">
           </div>
           <div class="cart-item-info">
             <h4>${item.name}</h4>
             <p class="cart-item-price">${window.formatPrice(item.price)}</p>
+            <p class="cart-item-variant">${item.variantType === 'boxer' ? 'Taille' : (item.variantType === 'shoes' ? 'Pointure' : 'Option')} : ${item.variantLabel || 'Non précisé'}</p>
           </div>
           <div class="cart-item-quantity">
             <button class="qty-btn minus" type="button">−</button>
@@ -159,7 +160,7 @@ class CartModal {
       container.querySelectorAll('.qty-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           const itemEl = e.target.closest('.cart-item');
-          const productId = parseInt(itemEl.dataset.productId);
+          const productKey = itemEl.dataset.itemKey;
           const qtyInput = itemEl.querySelector('.qty-input');
           let newQty = parseInt(qtyInput.value);
           
@@ -170,25 +171,25 @@ class CartModal {
           }
           
           qtyInput.value = newQty;
-          window.cart.updateQuantity(productId, newQty);
+          window.cart.updateQuantity(productKey, newQty);
         });
       });
 
       container.querySelectorAll('.qty-input').forEach(input => {
         input.addEventListener('change', (e) => {
           const itemEl = e.target.closest('.cart-item');
-          const productId = parseInt(itemEl.dataset.productId);
+          const productKey = itemEl.dataset.itemKey;
           let newQty = Math.max(1, parseInt(e.target.value) || 1);
           e.target.value = newQty;
-          window.cart.updateQuantity(productId, newQty);
+          window.cart.updateQuantity(productKey, newQty);
         });
       });
 
       container.querySelectorAll('.cart-item-remove').forEach(btn => {
         btn.addEventListener('click', (e) => {
           const itemEl = e.target.closest('.cart-item');
-          const productId = parseInt(itemEl.dataset.productId);
-          window.cart.removeItem(productId);
+          const productKey = itemEl.dataset.itemKey;
+          window.cart.removeItem(productKey);
           itemEl.style.animation = 'slideOutRight 0.3s ease-out forwards';
           setTimeout(() => this.updateCartDisplay(), 300);
         });

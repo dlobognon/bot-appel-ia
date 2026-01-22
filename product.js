@@ -15,6 +15,26 @@ function avgStars(reviews){
   return Math.round((sum / reviews.length) * 10) / 10;
 }
 
+// Détermine le type de variant selon la catégorie
+function getVariantType(product){
+  const cat = (product.category || "").toLowerCase();
+  const name = (product.name || "").toLowerCase();
+  
+  if(cat.includes("boxer") || name.includes("boxer")) return "boxer";
+  if(cat.includes("chaussure") || cat.includes("sandale") || name.includes("chaussure") || name.includes("sandale")) return "shoes";
+  return null;
+}
+
+// Génère les options selon le type
+function getVariantOptions(type){
+  if(type === "boxer") return ["L", "XL", "2XL", "3XL", "4XL"];
+  if(type === "shoes") return ["36", "37", "38", "39", "40", "41", "42"];
+  return [];
+}
+
+// État global pour la sélection actuelle
+let currentSelectedVariant = null;
+
 function renderProductPage(){
   const root = document.getElementById("product-page");
   if(!root) return;
@@ -28,6 +48,9 @@ function renderProductPage(){
     root.innerHTML = `<div class="pinfo"><h1>${missingTitle}</h1><p class="desc">${missingDesc}</p><a class="secondary-btn" href="index.html#catalogue">${missingBtn}</a></div>`;
     return;
   }
+
+  // Réinitialiser la sélection
+  currentSelectedVariant = null;
 
   const imgs = (p.images && p.images.length) ? p.images.slice(0,8) : [p.image].filter(Boolean);
   const reviews = p.reviews || [];
@@ -44,6 +67,25 @@ function renderProductPage(){
 
   document.title = `${pName} – Legancy Boutique`;
 
+  // Détecter le type de variant
+  const variantType = getVariantType(p);
+  const variantOptions = getVariantOptions(variantType);
+  
+  // HTML pour le sélecteur de variants
+  let variantSelectorHtml = "";
+  if(variantType && variantOptions.length > 0){
+    variantSelectorHtml = `
+      <div class="variant-selector">
+        <div class="variant-pills" id="variant-pills">
+          ${variantOptions.map(opt => `
+            <button class="variant-pill" type="button" data-value="${opt}">${opt}</button>
+          `).join('')}
+        </div>
+        <div class="variant-current" id="variant-current">Sélection actuelle : <span>Non précisé</span></div>
+      </div>
+    `;
+  }
+
   root.innerHTML = `
     <div class="gallery">
       <div class="gallery-main">
@@ -59,6 +101,8 @@ function renderProductPage(){
         `).join('')}
       </div>
     </div>
+
+    ${variantSelectorHtml}
 
     <div class="pinfo">
       <div class="pcat">${p.category}</div>
@@ -101,6 +145,31 @@ function renderProductPage(){
     </div>
   `;
 
+  // Gestion des variants
+  if(variantType && variantOptions.length > 0){
+    const pills = document.querySelectorAll("#variant-pills .variant-pill");
+    const currentDisplay = document.querySelector("#variant-current span");
+    
+    pills.forEach(pill => {
+      pill.addEventListener("click", function(){
+        const value = this.dataset.value;
+        
+        // Toggle : désélectionner si déjà sélectionné
+        if(this.classList.contains("is-selected")){
+          this.classList.remove("is-selected");
+          currentSelectedVariant = null;
+          if(currentDisplay) currentDisplay.textContent = "Non précisé";
+        } else {
+          // Désélectionner les autres
+          pills.forEach(p => p.classList.remove("is-selected"));
+          this.classList.add("is-selected");
+          currentSelectedVariant = value;
+          if(currentDisplay) currentDisplay.textContent = value;
+        }
+      });
+    });
+  }
+
   let idx = 0;
   const main = document.getElementById("main-img");
   const thumbs = Array.from(document.querySelectorAll("#thumbs .thumb"));
@@ -117,8 +186,16 @@ function renderProductPage(){
   document.querySelector(".gbtn.next")?.addEventListener("click", ()=>setIdx(idx+1));
   thumbs.forEach(t=> t.addEventListener("click", ()=>setIdx(Number(t.dataset.idx||0))) );
 
-  document.getElementById("add-btn")?.addEventListener("click", ()=> addToCart(p.id));
-  document.getElementById("buy-btn")?.addEventListener("click", ()=>{ addToCart(p.id); openCart(); });
+  document.getElementById("add-btn")?.addEventListener("click", ()=> {
+    const variant = currentSelectedVariant || "Non précisé";
+    addToCart(p.id, variant, variantType);
+  });
+  
+  document.getElementById("buy-btn")?.addEventListener("click", ()=>{ 
+    const variant = currentSelectedVariant || "Non précisé";
+    addToCart(p.id, variant, variantType);
+    openCart(); 
+  });
 }
 
 document.addEventListener("DOMContentLoaded", renderProductPage);

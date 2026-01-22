@@ -8,6 +8,8 @@ class ProductDetail {
     this.product = null;
     this.currentImageIndex = 0;
     this.quantity = 1;
+    this.variantType = null;
+    this.selectedVariant = null;
     this.init();
   }
 
@@ -39,7 +41,7 @@ class ProductDetail {
     const container = document.getElementById('productDetailContainer');
     const priceStr = window.formatPrice(this.product.price);
     const oldPriceStr = this.product.oldPrice ? window.formatPrice(this.product.oldPrice) : '';
-    const badge = this.product.promoLabel ? `<div style="background: #ef4444; color: white; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; display: inline-block; margin-bottom: 16px;">${this.product.promoLabel}</div>` : '';
+    const badge = this.product.promoLabel ? `<div class="promo-badge-wrapper" style="display: inline-flex; width: auto; flex: 0 0 auto; align-self: flex-start;"><div style="display: inline-flex; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; white-space: nowrap; border: 1px solid rgba(255,255,255,0.15); letter-spacing: 0.03em; width: auto; max-width: max-content; flex: 0 0 auto;">${this.product.promoLabel}</div></div>` : '';
     const reviewsTitle = trDetail('reviews.title', 'Avis Clients');
     const reviewsFormTitle = trDetail('reviews.form_title', 'Laisser un avis');
     const reviewNameLabel = trDetail('reviews.name_label', 'Votre nom *');
@@ -55,6 +57,17 @@ class ProductDetail {
     const trustPay = trDetail('product.trust.pay', '✓ Paiement à la livraison');
     const trustDelivery = trDetail('product.trust.delivery', "✓ Livraison rapide en Côte d'Ivoire");
     const trustAuthentic = trDetail('product.trust.authentic', '✓ Produit 100% authentique garantie');
+
+    this.variantType = window.getVariantType?.(this.product) || null;
+    const variantOptions = this.getVariantOptions(this.variantType);
+    const variantHtml = (this.variantType && variantOptions.length) ? `
+      <div class="variant-selector">
+        <div class="variant-pills" id="variantPills">
+          ${variantOptions.map(opt => `<button type="button" class="variant-pill" data-value="${opt}">${opt}</button>`).join('')}
+        </div>
+        <div class="variant-current" id="variantCurrent">Sélection actuelle : <span>Non précisé</span></div>
+      </div>
+    ` : '';
 
     // Section avis clients (dynamique avec formulaire)
     const reviewsHtml = `
@@ -106,46 +119,55 @@ class ProductDetail {
     ` : '';
 
     container.innerHTML = `
-      <div class="product-gallery">
-        <div class="product-main-image">
-          <img id="mainImage" src="${this.product.images[0]}" alt="${this.product.name}">
-        </div>
-        <div class="product-thumbnails">
-          ${this.product.images.slice(0, 6).map((img, i) => `
-            <div class="product-thumbnail ${i === 0 ? 'active' : ''}" data-index="${i}">
-              <img src="${img}" alt="Thumbnail ${i + 1}">
+      <div class="product-layout">
+        <!-- COLONNE GAUCHE : Galerie + Sélecteur de tailles -->
+        <div class="product-gallery-section">
+          <div class="product-gallery">
+            <div class="product-main-image">
+              <img id="mainImage" src="${this.product.images[0]}" alt="${this.product.name}">
             </div>
-          `).join('')}
+            <div class="product-thumbnails">
+              ${this.product.images.slice(0, 6).map((img, i) => `
+                <div class="product-thumbnail ${i === 0 ? 'active' : ''}" data-index="${i}">
+                  <img src="${img}" alt="Thumbnail ${i + 1}">
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          ${variantHtml}
+        </div>
+
+        <!-- COLONNE DROITE : Info achat (prix, quantité, bouton) -->
+        <div class="product-purchase-section">
+          ${badge}
+          <h1 class="product-detail-name">${this.product.name}</h1>
+          
+          <div class="product-detail-price">
+            <span class="product-detail-current-price">${priceStr}</span>
+            ${oldPriceStr ? `<span class="product-detail-old-price">${oldPriceStr}</span>` : ''}
+          </div>
+
+          <div class="product-actions-large">
+            <div class="product-qty">
+              <button class="qty-btn" id="qtyMinus" type="button">−</button>
+              <input type="number" class="qty-input" id="qtyInput" value="1" min="1" readonly>
+              <button class="qty-btn" id="qtyPlus" type="button">+</button>
+            </div>
+            <button class="add-to-cart-btn-large" id="addToCartBtn" type="button" data-i18n="product.add_to_cart">${addToCartLabel}</button>
+          </div>
+
+          <p style="color: rgba(255,255,255,0.7); font-size: 13px; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.08);">
+            <span data-i18n="product.trust.pay">${trustPay}</span><br>
+            <span data-i18n="product.trust.delivery">${trustDelivery}</span><br>
+            <span data-i18n="product.trust.authentic">${trustAuthentic}</span>
+          </p>
         </div>
       </div>
 
+      <!-- DESCRIPTION & AVANTAGES (pleine largeur) -->
       <div class="product-details-info">
-        ${badge}
-        <h1 class="product-detail-name">${this.product.name}</h1>
-        
-        <div class="product-detail-price">
-          <span class="product-detail-current-price">${priceStr}</span>
-          ${oldPriceStr ? `<span class="product-detail-old-price">${oldPriceStr}</span>` : ''}
-        </div>
-
         <p class="product-description">${this.product.description}</p>
-
         ${benefitsHtml}
-
-        <div class="product-actions-large">
-          <div class="product-qty">
-            <button class="qty-btn" id="qtyMinus" type="button">−</button>
-            <input type="number" class="qty-input" id="qtyInput" value="1" min="1" readonly>
-            <button class="qty-btn" id="qtyPlus" type="button">+</button>
-          </div>
-          <button class="add-to-cart-btn-large" id="addToCartBtn" type="button" data-i18n="product.add_to_cart">${addToCartLabel}</button>
-        </div>
-
-        <p style="color: rgba(255,255,255,0.7); font-size: 13px; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.08);">
-          <span data-i18n="product.trust.pay">${trustPay}</span><br>
-          <span data-i18n="product.trust.delivery">${trustDelivery}</span><br>
-          <span data-i18n="product.trust.authentic">${trustAuthentic}</span>
-        </p>
       </div>
 
       ${reviewsHtml}
@@ -193,7 +215,8 @@ class ProductDetail {
     const addBtn = document.getElementById('addToCartBtn');
     if (addBtn) {
       addBtn.addEventListener('click', () => {
-        window.cart.addItem(this.product, this.quantity);
+        const variantValue = this.selectedVariant || null;
+        window.cart.addItem(this.product, this.quantity, this.variantType, variantValue);
         const originalText = addBtn.textContent;
         addBtn.textContent = '✓ Ajouté au panier!';
         addBtn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
@@ -203,6 +226,8 @@ class ProductDetail {
         }, 2000);
       });
     }
+
+    this.attachVariantListeners();
 
     // Initialiser le système d'avis
     this.initReviewSystem();
@@ -308,6 +333,34 @@ class ProductDetail {
     
     document.querySelectorAll('.product-thumbnail').forEach((thumb, i) => {
       thumb.classList.toggle('active', i === index);
+    });
+  }
+
+  getVariantOptions(type) {
+    if (type === 'boxer') return ['L', 'XL', '2XL', '3XL', '4XL'];
+    if (type === 'shoes') return ['36', '37', '38', '39', '40', '41', '42'];
+    return [];
+  }
+
+  attachVariantListeners() {
+    if (!this.variantType) return;
+    const pills = Array.from(document.querySelectorAll('#variantPills .variant-pill'));
+    const currentDisplay = document.querySelector('#variantCurrent span');
+
+    pills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        const value = pill.dataset.value;
+        if (pill.classList.contains('is-selected')) {
+          pill.classList.remove('is-selected');
+          this.selectedVariant = null;
+          if (currentDisplay) currentDisplay.textContent = 'Non précisé';
+        } else {
+          pills.forEach(p => p.classList.remove('is-selected'));
+          pill.classList.add('is-selected');
+          this.selectedVariant = value;
+          if (currentDisplay) currentDisplay.textContent = value;
+        }
+      });
     });
   }
 }

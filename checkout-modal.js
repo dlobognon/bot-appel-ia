@@ -224,12 +224,19 @@ class CheckoutModal {
     const shipping = calculateShipping(cityInput);
     const total = subtotal + shipping;
 
-    const summaryHTML = window.cart.items.map(item => `
-      <div class="order-summary-item">
-        <span>${item.name} x${item.quantity}</span>
-        <span>${window.formatPrice(item.price * item.quantity)}</span>
-      </div>
-    `).join('');
+    const summaryHTML = window.cart.items.map(item => {
+      const label = item.variantType === 'boxer' ? 'Taille' : (item.variantType === 'shoes' ? 'Pointure' : 'Option');
+      const value = item.variantLabel || 'Non précisé';
+      return `
+        <div class="order-summary-item">
+          <div>
+            <span>${item.name} x${item.quantity}</span><br>
+            <small style="color: rgba(255,255,255,0.7);">${label} : ${value}</small>
+          </div>
+          <span>${window.formatPrice(item.price * item.quantity)}</span>
+        </div>
+      `;
+    }).join('');
 
     this.modal.querySelector('#orderSummary').innerHTML = summaryHTML;
     this.modal.querySelector('#checkoutSubtotal').textContent = window.formatPrice(subtotal);
@@ -239,7 +246,11 @@ class CheckoutModal {
 
   sendViaWhatsApp() {
     const formData = this.getFormData();
-    const items = formData.items.map(item => `${item.name} x${item.quantity} - ${window.formatPrice(item.price * item.quantity)}`).join('\n');
+    const items = formData.items.map(item => {
+      const label = item.variantType === 'boxer' ? 'Taille' : (item.variantType === 'shoes' ? 'Pointure' : 'Option');
+      const value = item.variantLabel || 'Non précisé';
+      return `${item.name} x${item.quantity} (${label}: ${value}) - ${window.formatPrice(item.price * item.quantity)}`;
+    }).join('\n');
     
     const message = `
   *NOUVELLE COMMANDE* 📦

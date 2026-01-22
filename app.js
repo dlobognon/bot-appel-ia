@@ -113,41 +113,69 @@ class CartManager {
     this.updateUI();
   }
 
+  buildKey(id, variantType, variantValue) {
+    const type = variantType || '';
+    const value = variantValue || '';
+    return `${id}::${type}::${value}`;
+  }
+
   loadCart() {
     const saved = localStorage.getItem('legancy_cart');
-    return saved ? JSON.parse(saved) : [];
+    const parsed = saved ? JSON.parse(saved) : [];
+
+    // Garantir la présence des clés/labels pour compatibilité ascendante
+    return parsed.map(it => {
+      const variantType = it.variantType || null;
+      const variantValue = it.variantValue || null;
+      const variantLabel = variantValue || 'Non précisé';
+      return {
+        ...it,
+        variantType,
+        variantValue,
+        variantLabel,
+        key: it.key || this.buildKey(it.id, variantType, variantValue)
+      };
+    });
   }
 
   saveCart() {
     localStorage.setItem('legancy_cart', JSON.stringify(this.items));
   }
 
-  addItem(product, quantity = 1) {
-    const existing = this.items.find(item => item.id === product.id);
+  addItem(product, quantity = 1, variantType = null, variantValue = null) {
+    const key = this.buildKey(product.id, variantType, variantValue || null);
+    const existing = this.items.find(item => item.key === key);
+    const variantLabel = variantValue || 'Non précisé';
+
     if (existing) {
       existing.quantity += quantity;
     } else {
       this.items.push({
+        key,
         id: product.id,
         name: product.name,
         price: product.price,
         image: product.images[0],
-        quantity: quantity,
-        category: product.category
+        quantity,
+        category: product.category,
+        variantType,
+        variantValue,
+        variantLabel
       });
     }
+
     this.saveCart();
     this.updateUI();
   }
 
-  removeItem(productId) {
-    this.items = this.items.filter(item => item.id !== productId);
+  removeItem(keyOrId) {
+    this.items = this.items.filter(item => item.key !== keyOrId && item.id !== keyOrId);
     this.saveCart();
     this.updateUI();
   }
 
-  updateQuantity(productId, quantity) {
-    const item = this.items.find(item => item.id === productId);
+  updateQuantity(keyOrId, quantity) {
+    const item = this.items.find(item => item.key === keyOrId || item.id === keyOrId);
     if (item) {
       item.quantity = Math.max(1, quantity);
       this.saveCart();
@@ -237,6 +265,20 @@ function renderProductCard(product) {
   `;
 }
 
+function getVariantType(product) {
+  const cat = (product.category || '').toLowerCase();
+  const sub = (product.subcategory || '').toLowerCase();
+  const name = (product.name || '').toLowerCase();
+
+  if (cat.includes('boxer') || sub.includes('boxeur') || sub.includes('boxer') || name.includes('boxer')) {
+    return 'boxer';
+  }
+  if (cat.includes('chaussure') || cat.includes('sandale') || sub.includes('chaussure') || sub.includes('sandale') || name.includes('sandale') || name.includes('chaussure')) {
+    return 'shoes';
+  }
+  return null;
+}
+
 // ===== EVENT LISTENERS =====
 document.addEventListener('DOMContentLoaded', () => {
   // Update WhatsApp links
@@ -286,3 +328,4 @@ window.CONFIG = CONFIG;
 window.formatPrice = formatPrice;
 window.getProductById = getProductById;
 window.renderProductCard = renderProductCard;
+window.getVariantType = getVariantType;
