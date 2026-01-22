@@ -2,7 +2,7 @@
 // Configuration & Logique Principale
 
 const CONFIG = {
-  WHATSAPP_NUMBER: '2250768245917',
+  WHATSAPP_NUMBER: '2250586306077',
   BUSINESS_NAME: 'Legancy Boutique'
 };
 
