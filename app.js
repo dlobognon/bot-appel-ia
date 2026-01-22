@@ -361,6 +361,7 @@ document.addEventListener('DOMContentLoaded', () => {
     mobileBottomSheet.classList.add('open');
     mobileBottomSheet.setAttribute('aria-hidden', 'false');
     document.body.classList.add('menu-open');
+    document.body.classList.add('no-scroll');
     if (mobileMenuToggle) mobileMenuToggle.setAttribute('aria-expanded', 'true');
     if (mobileMenuOverlay) mobileMenuOverlay.classList.add('open');
   };
@@ -370,6 +371,7 @@ document.addEventListener('DOMContentLoaded', () => {
     mobileBottomSheet.classList.remove('open');
     mobileBottomSheet.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('menu-open');
+    document.body.classList.remove('no-scroll');
     if (mobileMenuToggle) mobileMenuToggle.setAttribute('aria-expanded', 'false');
     if (mobileMenuOverlay) mobileMenuOverlay.classList.remove('open');
     setAccordion(siteAccordionBtn, siteAccordionPanel, false);
@@ -402,8 +404,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  if (mobileSheetClose) mobileSheetClose.addEventListener('click', closeMobileMenu);
-  if (mobileMenuOverlay) mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+  if (mobileSheetClose) {
+    mobileSheetClose.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      closeMobileMenu();
+    }, { capture: true });
+  }
+  if (mobileMenuOverlay) {
+    mobileMenuOverlay.addEventListener('click', (e) => {
+      if (e.target === mobileMenuOverlay) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeMobileMenu();
+      }
+    }, { capture: true });
+  }
 
   if (siteAccordionBtn && siteAccordionPanel) {
     siteAccordionBtn.addEventListener('click', () => toggleAccordion(siteAccordionBtn, siteAccordionPanel));
@@ -420,7 +436,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
+    if (e.key === 'Escape' && mobileBottomSheet && mobileBottomSheet.classList.contains('open')) {
+      e.preventDefault();
       closeMobileMenu();
     }
   });

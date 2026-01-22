@@ -38,6 +38,11 @@ img, video {
 
 body { overflow-x: hidden; }
 
+body.no-scroll {
+  overflow: hidden;
+  height: 100vh;
+}
+
 body {
   background: var(--bg);
   color: var(--text);
@@ -211,9 +216,13 @@ a { color: inherit; text-decoration: none; }
   overflow: hidden;
   display: none;
   flex-direction: column;
+  pointer-events: auto;
 }
 
-.mobileBottomSheet.open { transform: translateY(0); }
+.mobileBottomSheet.open {
+  transform: translateY(0);
+  display: flex;
+}
 
 .mobileSheetHeader {
   display: flex;
@@ -221,6 +230,9 @@ a { color: inherit; text-decoration: none; }
   justify-content: space-between;
   padding: 14px 16px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
 }
 
 .mobileSheetTitle { font-size: 16px; font-weight: 600; }
@@ -236,6 +248,19 @@ a { color: inherit; text-decoration: none; }
   font-size: 22px;
   cursor: pointer;
   color: #111111;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 2;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.mobileSheetClose:hover {
+  transform: scale(1.1);
+}
+
+.mobileSheetClose:active {
+  transform: scale(0.95);
 }
 
 .mobileSheetBody { overflow: auto; -webkit-overflow-scrolling: touch; }
