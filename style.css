@@ -936,6 +936,24 @@ a { color: inherit; text-decoration: none; }
   .checkout-modal { align-items: flex-end; justify-content: center; }
   .checkout-modal-content { border-radius: 16px 16px 0 0; max-height: 100%; }
   
+  /* Forcer le panier à droite sur mobile */
+  .header-actions {
+    order: 3;
+    margin-left: auto;
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .mobile-menu-toggle {
+    order: 1;
+  }
+  
+  .brand {
+    order: 2;
+    flex: 1;
+    min-width: 0;
+  }
+  
   .cart-item {
     grid-template-columns: clamp(44px, 8vw, 52px) 1fr clamp(40px, 8vw, 46px);
     grid-template-areas: "img info remove" "qty total total";
