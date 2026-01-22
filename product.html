@@ -11,6 +11,9 @@
   <!-- HEADER -->
   <header class="header">
     <div class="header-inner">
+      <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-expanded="false" aria-controls="mobileBottomSheet" aria-label="Ouvrir le menu">
+        <span class="hamburger-icon" aria-hidden="true"></span>
+      </button>
       <a class="brand" href="index.html" aria-label="Legancy Boutique - Accueil">
         <img class="brand-logo" src="assets/logo.jpg" alt="Logo Legancy Boutique">
         <div class="brand-text">
@@ -46,6 +49,34 @@
         <button class="cart-btn" id="cart-btn" type="button">
           <span data-i18n="header.cart">Panier</span> <span class="cart-count" id="cart-count">0</span>
         </button>
+      </div>
+    </div>
+    <div class="mobileMenuOverlay" id="mobileMenuOverlay"></div>
+    <div class="mobileBottomSheet" id="mobileBottomSheet" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="mobileSheetHeader">
+        <span class="mobileSheetTitle">Menu</span>
+        <button class="mobileSheetClose" id="mobileSheetClose" type="button" aria-label="Fermer le menu">×</button>
+      </div>
+      <div class="mobileSheetBody">
+        <a class="mobileNavItem" href="index.html" data-i18n="nav.home"><span class="label">Accueil</span></a>
+        <a class="mobileNavItem" href="catalogue.html" data-i18n="nav.catalogue"><span class="label">Catalogue</span></a>
+        <a class="mobileNavItem" href="conditions.html" data-i18n="nav.conditions"><span class="label">Conditions</span></a>
+        <a class="mobileNavItem" id="wa-header-mobile" href="#" target="_blank" rel="noopener" data-i18n="header.whatsapp"><span class="label">WhatsApp</span></a>
+        <button class="mobileNavItem" id="cart-btn-mobile" type="button"><span class="label" data-i18n="header.cart">Panier</span><span class="cart-count" id="cart-count-mobile">0</span></button>
+
+        <button class="accordionBtn" id="siteAccordionBtn" type="button"><span data-i18n="nav.follow">Suivez-nous</span><span class="chevron">⌃</span></button>
+        <div class="accordionPanel" id="siteAccordionPanel">
+          <a class="accordionOption" role="menuitem" href="https://instagram.com/" target="_blank" rel="noopener">Instagram</a>
+          <a class="accordionOption" role="menuitem" href="https://facebook.com/" target="_blank" rel="noopener">Facebook</a>
+          <a class="accordionOption" role="menuitem" href="https://tiktok.com/" target="_blank" rel="noopener">TikTok</a>
+        </div>
+
+        <button class="accordionBtn" id="langAccordionBtn" type="button"><span data-i18n="lang.toggle">Langue</span><span class="chevron">⌃</span></button>
+        <div class="accordionPanel" id="langAccordionPanel">
+          <button class="accordionOption lang-option" data-lang="fr" data-i18n="lang.fr" type="button">Français</button>
+          <button class="accordionOption lang-option" data-lang="en" data-i18n="lang.en" type="button">English</button>
+          <button class="accordionOption lang-option" data-lang="ar" data-i18n="lang.ar" type="button">العربية</button>
+        </div>
       </div>
     </div>
   </header>
