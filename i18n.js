@@ -422,8 +422,11 @@
       const key = el.getAttribute('data-i18n');
       const value = (translations[activeLang] && translations[activeLang][key]) || (translations.fr && translations.fr[key]);
       if (!value) return;
+      const useHtml = el.getAttribute('data-i18n-html') === '1';
       if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
         el.placeholder = value;
+      } else if (useHtml) {
+        el.innerHTML = value;
       } else {
         el.textContent = value;
       }
