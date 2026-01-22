@@ -324,18 +324,31 @@ document.addEventListener('DOMContentLoaded', () => {
   const mobileMq = window.matchMedia('(max-width: 768px)');
   let isMobile = mobileMq.matches;
 
-  // Force closed state on initialization
+  // Force closed state on initialization (CRITICAL for iOS)
   if (mobileBottomSheet) {
     mobileBottomSheet.classList.remove('open');
     mobileBottomSheet.setAttribute('aria-hidden', 'true');
+    mobileBottomSheet.style.display = 'none';
   }
   if (mobileMenuOverlay) {
     mobileMenuOverlay.classList.remove('open');
+    mobileMenuOverlay.style.opacity = '0';
+    mobileMenuOverlay.style.pointerEvents = 'none';
   }
   if (mobileMenuToggle) {
     mobileMenuToggle.setAttribute('aria-expanded', 'false');
   }
   document.body.classList.remove('menu-open');
+  document.body.classList.remove('no-scroll');
+  
+  // Failsafe: Re-check after a brief delay (iOS rendering)
+  setTimeout(() => {
+    if (mobileBottomSheet && mobileBottomSheet.classList.contains('open') === false) {
+      if (mobileBottomSheet.style.display !== 'none') {
+        mobileBottomSheet.style.display = 'none';
+      }
+    }
+  }, 50);
 
   const setAccordion = (btn, panel, open) => {
     if (!btn || !panel) return;
@@ -358,22 +371,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const openMobileMenu = () => {
     if (!mobileBottomSheet || !isMobile) return;
+    
     mobileBottomSheet.classList.add('open');
     mobileBottomSheet.setAttribute('aria-hidden', 'false');
+    mobileBottomSheet.style.display = 'flex';
+    
     document.body.classList.add('menu-open');
     document.body.classList.add('no-scroll');
+    
     if (mobileMenuToggle) mobileMenuToggle.setAttribute('aria-expanded', 'true');
-    if (mobileMenuOverlay) mobileMenuOverlay.classList.add('open');
+    
+    if (mobileMenuOverlay) {
+      mobileMenuOverlay.classList.add('open');
+      mobileMenuOverlay.style.opacity = '1';
+      mobileMenuOverlay.style.pointerEvents = 'auto';
+    }
   };
 
   const closeMobileMenu = () => {
     if (!mobileBottomSheet) return;
+    
+    // Remove all open states
     mobileBottomSheet.classList.remove('open');
     mobileBottomSheet.setAttribute('aria-hidden', 'true');
+    mobileBottomSheet.style.display = 'none';
+    
     document.body.classList.remove('menu-open');
     document.body.classList.remove('no-scroll');
+    
     if (mobileMenuToggle) mobileMenuToggle.setAttribute('aria-expanded', 'false');
-    if (mobileMenuOverlay) mobileMenuOverlay.classList.remove('open');
+    
+    if (mobileMenuOverlay) {
+      mobileMenuOverlay.classList.remove('open');
+      mobileMenuOverlay.style.opacity = '0';
+      mobileMenuOverlay.style.pointerEvents = 'none';
+    }
+    
     setAccordion(siteAccordionBtn, siteAccordionPanel, false);
     setAccordion(langAccordionBtn, langAccordionPanel, false);
   };
