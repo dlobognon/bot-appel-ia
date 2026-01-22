@@ -242,9 +242,26 @@ function renderProductCard(product) {
   const badge = product.promoLabel ? `<div class="product-badge">${product.promoLabel}</div>` : '';
   const addLabel = tr('buttons.add', 'Ajouter');
   const viewLabel = tr('buttons.view', 'Voir');
+  const variantType = getVariantType(product);
+  
+  // Générer les options de variante si applicable
+  let variantOptions = [];
+  if (variantType === 'boxer') variantOptions = ['L', 'XL', '2XL', '3XL', '4XL'];
+  else if (variantType === 'shoes') variantOptions = ['36', '37', '38', '39', '40', '41', '42'];
+  
+  // HTML du quick picker (caché par défaut)
+  const pickerHtml = variantOptions.length > 0 ? `
+    <div class="quick-picker" data-product-id="${product.id}" data-variant-type="${variantType}">
+      <div class="quick-picker-content">
+        <div class="quick-picker-options">
+          ${variantOptions.map(opt => `<button class="variant-pill-card" type="button" data-value="${opt}" data-product-id="${product.id}">${opt}</button>`).join('')}
+        </div>
+      </div>
+    </div>
+  ` : '';
   
   return `
-    <div class="product-card">
+    <div class="product-card" data-product-id="${product.id}" data-variant-type="${variantType || 'none'}">
       <div class="product-image-wrapper">
         ${badge}
         <img src="${product.images[0]}" alt="${product.name}" class="product-image">
@@ -257,9 +274,10 @@ function renderProductCard(product) {
           ${oldPriceStr ? `<span class="price-old">${oldPriceStr}</span>` : ''}
         </div>
         <div class="product-actions">
-          <button class="add-to-cart-btn" data-product-id="${product.id}" type="button">${addLabel}</button>
+          <button class="add-to-cart-btn quick-add-btn" data-product-id="${product.id}" type="button">${addLabel}</button>
           <a href="product.html?id=${product.id}" class="product-view-link" style="flex: 0.8;">${viewLabel}</a>
         </div>
+        ${pickerHtml}
       </div>
     </div>
   `;
@@ -291,15 +309,65 @@ document.addEventListener('DOMContentLoaded', () => {
   if (waContact) waContact.href = `https://wa.me/${whatsappNumber}`;
   if (footerWa) footerWa.href = `https://wa.me/${whatsappNumber}`;
 
-  // Add to cart button handlers
+  // Add to cart button handlers - WITH QUICK PICKER
   document.addEventListener('click', (e) => {
-    if (e.target.classList.contains('add-to-cart-btn')) {
+    // Quick Add button avec sélecteur de variante
+    if (e.target.classList.contains('quick-add-btn')) {
       const productId = parseInt(e.target.getAttribute('data-product-id'));
+      const productCard = e.target.closest('.product-card');
+      const quickPicker = productCard.querySelector('.quick-picker');
+      
+      if (!quickPicker) {
+        // Pas de variantes => ajouter directement
+        const product = getProductById(productId);
+        if (product) {
+          window.cart.addItem(product, 1, null, null);
+          const btn = e.target;
+          const originalText = btn.textContent;
+          btn.textContent = '✓ Ajouté';
+          btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+          setTimeout(() => {
+            btn.textContent = originalText;
+            btn.style.background = '';
+          }, 1500);
+        }
+      } else {
+        // Avec variantes
+        if (quickPicker.classList.contains('open')) {
+          // 2e clic => ajouter avec "Non précisé" et fermer
+          const product = getProductById(productId);
+          const variantType = productCard.getAttribute('data-variant-type');
+          if (product) {
+            window.cart.addItem(product, 1, variantType, null);
+            const btn = e.target;
+            const originalText = btn.textContent;
+            btn.textContent = '✓ Ajouté';
+            btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+            setTimeout(() => {
+              btn.textContent = originalText;
+              btn.style.background = '';
+            }, 1500);
+          }
+          quickPicker.classList.remove('open');
+        } else {
+          // 1er clic => ouvrir le picker
+          quickPicker.classList.add('open');
+        }
+      }
+    }
+    
+    // Clic sur une variante (pill) => ajouter avec cette variante
+    if (e.target.classList.contains('variant-pill-card')) {
+      const productId = parseInt(e.target.getAttribute('data-product-id'));
+      const variantValue = e.target.getAttribute('data-value');
+      const productCard = document.querySelector(`.product-card[data-product-id="${productId}"]`);
+      const variantType = productCard.getAttribute('data-variant-type');
       const product = getProductById(productId);
+      
       if (product) {
-        window.cart.addItem(product, 1);
-        // Show feedback
-        const btn = e.target;
+        window.cart.addItem(product, 1, variantType, variantValue);
+        // Feedback
+        const btn = productCard.querySelector('.quick-add-btn');
         const originalText = btn.textContent;
         btn.textContent = '✓ Ajouté';
         btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
@@ -307,7 +375,20 @@ document.addEventListener('DOMContentLoaded', () => {
           btn.textContent = originalText;
           btn.style.background = '';
         }, 1500);
+        // Fermer le picker
+        const quickPicker = productCard.querySelector('.quick-picker');
+        if (quickPicker) quickPicker.classList.remove('open');
       }
+    }
+  });
+
+  // Fermer le quick picker en cliquant en dehors
+  document.addEventListener('click', (e) => {
+    // Si le clic n'est pas sur une carte, fermer tous les pickers
+    if (!e.target.closest('.product-card')) {
+      document.querySelectorAll('.quick-picker.open').forEach(picker => {
+        picker.classList.remove('open');
+      });
     }
   });
 
