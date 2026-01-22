@@ -145,7 +145,7 @@ a { color: inherit; text-decoration: none; }
 /* Bouton WhatsApp flottant en haut à droite */
 .wa-floating-btn {
   position: fixed;
-  top: 20px;
+  top: 100px;
   right: 20px;
   width: 44px;
   height: 44px;
