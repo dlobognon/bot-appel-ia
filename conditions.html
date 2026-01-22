@@ -61,16 +61,22 @@
         <a href="conditions.html" data-i18n="nav.conditions">Conditions</a>
       </div>
       <div class="mobile-menu-section">
-        <p class="menu-section-label" data-i18n="lang.toggle">Langue</p>
-        <div class="mobile-lang-options">
+        <button class="menu-accordion-toggle" data-target="lang-accordion" aria-expanded="false" type="button">
+          <span class="menu-section-label" data-i18n="lang.toggle">Langue</span>
+          <span class="accordion-chevron">›</span>
+        </button>
+        <div class="mobile-lang-options" id="lang-accordion" hidden>
           <button class="lang-option" data-lang="fr" data-i18n="lang.fr">Français</button>
           <button class="lang-option" data-lang="en" data-i18n="lang.en">English</button>
           <button class="lang-option" data-lang="ar" data-i18n="lang.ar">العربية</button>
         </div>
       </div>
       <div class="mobile-menu-section">
-        <p class="menu-section-label" data-i18n="nav.follow">Suivez-nous</p>
-        <div class="mobile-menu-links">
+        <button class="menu-accordion-toggle" data-target="social-accordion" aria-expanded="false" type="button">
+          <span class="menu-section-label" data-i18n="nav.follow">Suivez-nous</span>
+          <span class="accordion-chevron">›</span>
+        </button>
+        <div class="mobile-menu-links" id="social-accordion" hidden>
           <a role="menuitem" href="https://www.instagram.com/legancy.boutique/" target="_blank" rel="noopener noreferrer">Instagram</a>
           <a role="menuitem" href="https://www.facebook.com/profile.php?id=61586722205339" target="_blank" rel="noopener noreferrer">Facebook</a>
           <a role="menuitem" href="https://www.tiktok.com/@legancyboutique" target="_blank" rel="noopener noreferrer">TikTok</a>

@@ -469,6 +469,42 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // ===== ACCORDÉONS MENU MOBILE =====
+  const accordionToggles = document.querySelectorAll('.menu-accordion-toggle');
+  
+  accordionToggles.forEach(toggle => {
+    toggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const targetId = toggle.getAttribute('data-target');
+      const targetContent = document.getElementById(targetId);
+      const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+      
+      // Fermer les autres accordéons
+      accordionToggles.forEach(otherToggle => {
+        if (otherToggle !== toggle) {
+          otherToggle.setAttribute('aria-expanded', 'false');
+          const otherId = otherToggle.getAttribute('data-target');
+          const otherContent = document.getElementById(otherId);
+          if (otherContent) {
+            otherContent.setAttribute('hidden', '');
+            otherContent.setAttribute('aria-expanded', 'false');
+          }
+        }
+      });
+      
+      // Toggle l'accordéon courant
+      if (isExpanded) {
+        toggle.setAttribute('aria-expanded', 'false');
+        targetContent.setAttribute('hidden', '');
+        targetContent.setAttribute('aria-expanded', 'false');
+      } else {
+        toggle.setAttribute('aria-expanded', 'true');
+        targetContent.removeAttribute('hidden');
+        targetContent.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+
   // Cart button - ouvre le modal du panier
   const cartBtn = document.getElementById('cart-btn');
   if (cartBtn) {
