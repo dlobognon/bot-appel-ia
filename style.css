@@ -1031,22 +1031,23 @@ main {
   .checkout-modal { align-items: flex-end; justify-content: center; }
   .checkout-modal-content { border-radius: 16px 16px 0 0; max-height: 100%; }
   
-  /* Forcer le panier à droite sur mobile */
+  /* Menu hamburger à droite après le panier sur mobile */
+  .brand {
+    order: 1;
+    flex: 1;
+    min-width: 0;
+  }
+  
   .header-actions {
-    order: 3;
+    order: 2;
     margin-left: auto;
     display: flex;
     justify-content: flex-end;
+    gap: clamp(8px, 1.5vw, 12px);
   }
   
   .mobile-menu-toggle {
-    order: 1;
-  }
-  
-  .brand {
-    order: 2;
-    flex: 1;
-    min-width: 0;
+    order: 3;
   }
   
   .cart-item {
