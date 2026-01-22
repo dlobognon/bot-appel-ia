@@ -11,9 +11,7 @@
   <!-- HEADER -->
   <header class="header">
     <div class="header-inner">
-      <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-expanded="false" aria-controls="mobileBottomSheet" aria-label="Ouvrir le menu">
-        <span class="hamburger-icon" aria-hidden="true"></span>
-      </button>
+      <!-- DESKTOP NAV -->
       <a class="brand" href="index.html" aria-label="Legancy Boutique - Accueil">
         <img class="brand-logo" src="assets/logo.jpg" alt="Logo Legancy Boutique">
         <div class="brand-text">
@@ -50,32 +48,38 @@
           <span data-i18n="header.cart">Panier</span> <span class="cart-count" id="cart-count">0</span>
         </button>
       </div>
-    </div>
-    <div class="mobileMenuOverlay" id="mobileMenuOverlay"></div>
-    <div class="mobileBottomSheet" id="mobileBottomSheet" role="dialog" aria-modal="true" aria-hidden="true">
-      <div class="mobileSheetHeader">
-        <span class="mobileSheetTitle">Menu</span>
-        <button class="mobileSheetClose" id="mobileSheetClose" type="button" aria-label="Fermer le menu">×</button>
-      </div>
-      <div class="mobileSheetBody">
-        <a class="mobileNavItem" href="index.html" data-i18n="nav.home"><span class="label">Accueil</span></a>
-        <a class="mobileNavItem" href="catalogue.html" data-i18n="nav.catalogue"><span class="label">Catalogue</span></a>
-        <a class="mobileNavItem" href="conditions.html" data-i18n="nav.conditions"><span class="label">Conditions</span></a>
-        <a class="mobileNavItem" id="wa-header-mobile" href="#" target="_blank" rel="noopener" data-i18n="header.whatsapp"><span class="label">WhatsApp</span></a>
-        <button class="mobileNavItem" id="cart-btn-mobile" type="button"><span class="label" data-i18n="header.cart">Panier</span><span class="cart-count" id="cart-count-mobile">0</span></button>
 
-        <button class="accordionBtn" id="siteAccordionBtn" type="button"><span data-i18n="nav.follow">Suivez-nous</span><span class="chevron">⌃</span></button>
-        <div class="accordionPanel" id="siteAccordionPanel">
-          <a class="accordionOption" role="menuitem" href="https://www.instagram.com/legancy.boutique/" target="_blank" rel="noopener noreferrer">Instagram</a>
-          <a class="accordionOption" role="menuitem" href="https://www.facebook.com/profile.php?id=61586722205339" target="_blank" rel="noopener noreferrer">Facebook</a>
-          <a class="accordionOption" role="menuitem" href="https://www.tiktok.com/@legancyboutique" target="_blank" rel="noopener noreferrer">TikTok</a>
-        </div>
-
-        <button class="accordionBtn" id="langAccordionBtn" type="button"><span data-i18n="lang.toggle">Langue</span><span class="chevron">⌃</span></button>
-        <div class="accordionPanel" id="langAccordionPanel">
-          <button class="accordionOption lang-option" data-lang="fr" data-i18n="lang.fr" type="button">Français</button>
-          <button class="accordionOption lang-option" data-lang="en" data-i18n="lang.en" type="button">English</button>
-          <button class="accordionOption lang-option" data-lang="ar" data-i18n="lang.ar" type="button">العربية</button>
+      <!-- MOBILE NAV (visible only on mobile) -->
+      <div class="mobile-nav-wrapper">
+        <nav class="mobile-nav-links">
+          <a href="index.html" data-i18n="nav.home">Accueil</a>
+          <a href="catalogue.html" data-i18n="nav.catalogue">Catalogue</a>
+          <a href="conditions.html" data-i18n="nav.conditions">Conditions</a>
+          <div class="mobile-nav-item dropdown">
+            <button class="mobile-dropdown-toggle" type="button" aria-expanded="false" data-i18n="nav.follow">Site</button>
+            <div class="mobile-dropdown-menu" role="menu">
+              <a role="menuitem" href="https://www.instagram.com/legancy.boutique/" target="_blank" rel="noopener noreferrer">Instagram</a>
+              <a role="menuitem" href="https://www.facebook.com/profile.php?id=61586722205339" target="_blank" rel="noopener noreferrer">Facebook</a>
+              <a role="menuitem" href="https://www.tiktok.com/@legancyboutique" target="_blank" rel="noopener noreferrer">TikTok</a>
+            </div>
+          </div>
+          <div class="mobile-nav-item dropdown">
+            <button class="mobile-dropdown-toggle" type="button" aria-expanded="false" data-i18n="lang.toggle">Langue</button>
+            <div class="mobile-dropdown-menu" role="menu">
+              <button class="lang-option" data-lang="fr" type="button" data-i18n="lang.fr">Français</button>
+              <button class="lang-option" data-lang="en" type="button" data-i18n="lang.en">English</button>
+              <button class="lang-option" data-lang="ar" type="button" data-i18n="lang.ar">العربية</button>
+            </div>
+          </div>
+        </nav>
+        <div class="mobile-header-actions">
+          <a class="mobile-wa-btn" id="mobile-wa-header" href="#" target="_blank" rel="noopener" aria-label="WhatsApp" title="WhatsApp">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004c-3.183 0-5.827-2.582-5.827-5.795 0-3.104 2.644-5.745 5.847-5.745 3.192 0 5.956 2.641 5.956 5.896 0 3.182-2.791 5.766-5.964 5.766m5.108-11.569C15.75.055 13.226 0 12.055 0 6.906 0 2.927 3.898 2.927 8.922c0 1.547.38 3.061 1.11 4.411L2.9 22.352l4.168-2.18c1.289.703 2.746 1.076 4.242 1.076h4.059c5.187 0 9.19-3.899 9.19-8.923 0-2.384-.937-4.621-2.639-6.29"/></svg>
+          </a>
+          <button class="mobile-cart-btn" id="mobile-cart-btn" type="button" aria-label="Panier" title="Panier">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            <span class="cart-count" id="mobile-cart-count">0</span>
+          </button>
         </div>
       </div>
     </div>

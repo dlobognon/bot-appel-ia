@@ -50,6 +50,47 @@
           <span data-i18n="header.cart">Panier</span> <span class="cart-count" id="cart-count">0</span>
         </button>
       </div>
+
+      <!-- MOBILE NAV -->
+      <div class="mobile-nav-wrapper">
+        <button class="page-back-btn" id="pageBackBtn" type="button" aria-label="Retour">
+          ←
+        </button>
+        <nav class="mobile-nav-links">
+          <a href="index.html" data-i18n="nav.home">Accueil</a>
+          <a href="catalogue.html" data-i18n="nav.catalogue">Catalogue</a>
+          <a href="conditions.html" data-i18n="nav.conditions">Conditions</a>
+          <div class="mobile-nav-item dropdown">
+            <button class="mobile-dropdown-toggle" type="button" aria-expanded="false" data-i18n="nav.follow">Site</button>
+            <div class="mobile-dropdown-menu" role="menu">
+              <a role="menuitem" href="https://www.instagram.com/legancy.boutique/" target="_blank" rel="noopener noreferrer">Instagram</a>
+              <a role="menuitem" href="https://www.facebook.com/profile.php?id=61586722205339" target="_blank" rel="noopener noreferrer">Facebook</a>
+              <a role="menuitem" href="https://www.tiktok.com/@legancyboutique" target="_blank" rel="noopener noreferrer">TikTok</a>
+            </div>
+          </div>
+          <div class="mobile-nav-item dropdown">
+            <button class="mobile-dropdown-toggle" type="button" aria-expanded="false" data-i18n="lang.toggle">Langue</button>
+            <div class="mobile-dropdown-menu" role="menu">
+              <button class="lang-option" data-lang="fr" data-i18n="lang.fr" type="button">Français</button>
+              <button class="lang-option" data-lang="en" data-i18n="lang.en" type="button">English</button>
+              <button class="lang-option" data-lang="ar" data-i18n="lang.ar" type="button">العربية</button>
+            </div>
+          </div>
+        </nav>
+        <div class="mobile-header-actions">
+          <a class="mobile-wa-btn" id="mobile-wa-header" href="#" target="_blank" rel="noopener" aria-label="WhatsApp">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21.5 2H2.5C1.12 2 0 3.12 0 4.5v15C0 20.88 1.12 22 2.5 22h19C22.88 22 24 20.88 24 19.5v-15C24 3.12 22.88 2 21.5 2zm0 15h-19v-11h19v11z"/>
+            </svg>
+          </a>
+          <button class="mobile-cart-btn" id="mobile-cart-btn" type="button" aria-label="Panier">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+            </svg>
+            <span class="cart-count" id="mobile-cart-count">0</span>
+          </button>
+        </div>
+      </div>
     </div>
   </header>
 
