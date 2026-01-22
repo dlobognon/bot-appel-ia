@@ -11,6 +11,9 @@
   <!-- HEADER -->
   <header class="header">
     <div class="header-inner">
+      <button class="page-back-btn" id="pageBackBtn" type="button" aria-label="Retour">
+        ←
+      </button>
       <a class="brand" href="index.html" aria-label="Legancy Boutique - Accueil">
         <img class="brand-logo" src="assets/logo.jpg" alt="Logo Legancy Boutique">
         <div class="brand-text">
@@ -234,5 +237,18 @@
   <script src="cart-modal.js"></script>
   <script src="checkout-modal.js"></script>
   <script src="cart-init.js"></script>
+  <script>
+    // Page back button handler
+    const pageBackBtn = document.getElementById('pageBackBtn');
+    if (pageBackBtn) {
+      pageBackBtn.addEventListener('click', () => {
+        if (document.referrer && window.history.length > 1) {
+          window.history.back();
+        } else {
+          window.location.href = '/';
+        }
+      });
+    }
+  </script>
 </body>
 </html>

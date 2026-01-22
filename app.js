@@ -324,6 +324,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const mobileMq = window.matchMedia('(max-width: 768px)');
   let isMobile = mobileMq.matches;
 
+  // Force closed state on initialization
+  if (mobileBottomSheet) {
+    mobileBottomSheet.classList.remove('open');
+    mobileBottomSheet.setAttribute('aria-hidden', 'true');
+  }
+  if (mobileMenuOverlay) {
+    mobileMenuOverlay.classList.remove('open');
+  }
+  if (mobileMenuToggle) {
+    mobileMenuToggle.setAttribute('aria-expanded', 'false');
+  }
+  document.body.classList.remove('menu-open');
+
   const setAccordion = (btn, panel, open) => {
     if (!btn || !panel) return;
     if (open) {
