@@ -398,7 +398,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const mobileMenuClose = document.getElementById('mobileMenuClose');
   const mobileMenu = document.getElementById('mobileMenu');
   const mobileMenuBackdrop = document.getElementById('mobileMenuBackdrop');
-  const mobileMenuLinks = document.querySelectorAll('.mobile-menu-links a, .mobile-menu-actions a, .mobile-menu-actions button, .mobile-lang-options .lang-option');
+  const mobileMenuLinks = document.querySelectorAll('.mobile-menu-links a, .mobile-lang-options .lang-option');
 
   // Fonction pour fermer le menu mobile
   function closeMobileMenu() {
