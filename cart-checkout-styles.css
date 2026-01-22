@@ -384,6 +384,34 @@
   padding: clamp(12px, 2vh, 16px) clamp(14px, 2vw, 18px);
   border-bottom: 1px solid var(--stroke);
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(139, 92, 246, 0.03) 100%);
+  gap: clamp(12px, 2vw, 16px);
+}
+
+.checkout-back-btn {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  width: clamp(32px, 5vw, 36px);
+  height: clamp(32px, 5vw, 36px);
+  min-width: 32px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.checkout-back-btn:hover {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--primary-glow);
+}
+
+.checkout-back-btn svg {
+  width: 20px;
+  height: 20px;
 }
 
 .checkout-modal-header h2 {
@@ -391,6 +419,7 @@
   font-size: clamp(16px, 2.5vw, 20px);
   font-weight: 700;
   letter-spacing: -0.01em;
+  flex: 1;
 }
 
 .checkout-modal-close {
@@ -406,6 +435,7 @@
   transition: all 0.2s;
   border-radius: 8px;
   font-size: clamp(18px, 2.5vw, 24px);
+  flex-shrink: 0;
 }
 
 .checkout-modal-close:hover {
