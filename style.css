@@ -927,10 +927,12 @@ a { color: inherit; text-decoration: none; }
 /* Breakpoints pour changements structuraux uniquement */
 
 @media (max-width: 1024px) {
-  .header-inner { flex-wrap: wrap; row-gap: clamp(8px, 1.5vw, 12px); }
-  .brand { order: 1; }
-  .nav { order: 3; width: 100%; overflow-x: auto; padding: clamp(4px, 0.8vh, 6px) 0; justify-content: flex-start; }
-  .header-actions { order: 2; margin-left: auto; }
+  /* Conserver le panier à droite entre 768px et 1024px */
+  .header-inner { flex-wrap: nowrap; row-gap: 0; column-gap: clamp(8px, 1.5vw, 14px); }
+  .mobile-menu-toggle { order: 1; flex-shrink: 0; }
+  .brand { order: 2; min-width: 0; }
+  .nav { order: 3; flex: 1; min-width: 0; overflow-x: auto; padding: clamp(4px, 0.8vh, 6px) 0; justify-content: flex-start; }
+  .header-actions { order: 4; margin-left: auto; flex-shrink: 0; }
   .product-detail { grid-template-columns: 1fr; gap: clamp(16px, 3vh, 32px); }
 }
 
