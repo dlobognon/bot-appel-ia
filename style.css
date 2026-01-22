@@ -111,7 +111,13 @@ a { color: inherit; text-decoration: none; }
 .nav .dropdown:hover .dropdown-menu { display: block; }
 .nav .dropdown:focus-within .dropdown-menu { display: block; }
 
-.header-actions { display: flex; gap: var(--spacing-sm); align-items: center; flex-shrink: 0; }
+.header-actions { 
+  display: flex; 
+  gap: var(--spacing-sm); 
+  align-items: center; 
+  flex-shrink: 0;
+  margin-left: auto;
+}
 
 .btn, .primary-btn, .secondary-btn, .wa-btn, .cart-btn, .chip, .icon-btn {
   border: 1px solid var(--stroke);
