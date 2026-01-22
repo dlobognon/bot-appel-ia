@@ -21,14 +21,21 @@ class CartModal {
       <div id="cartModal" class="cart-modal">
         <div class="cart-modal-overlay"></div>
         <div class="cart-modal-content">
-          <div class="cart-modal-header">
-            <h2 data-i18n="cart.title">${title}</h2>
-            <button class="cart-modal-close" type="button">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </button>
+                <div class="cart-modal-header">
+                  <h2 data-i18n="cart.title">${title}</h2>
+                  <div class="cart-header-actions">
+                    <button class="cart-back-btn" type="button" id="cartBackBtn" title="Retour">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                      </svg>
+                    </button>
+                    <button class="cart-modal-close" type="button">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                    </button>
+                  </div>
           </div>
 
           <div class="cart-modal-body">
@@ -81,10 +88,12 @@ class CartModal {
 
   setupEventListeners() {
     const closeBtn = this.modal.querySelector('.cart-modal-close');
+    const backBtn = this.modal.querySelector('.cart-back-btn');
     const overlay = this.modal.querySelector('.cart-modal-overlay');
     const checkoutBtn = this.modal.querySelector('#checkoutBtn');
 
     closeBtn.addEventListener('click', () => this.close());
+    backBtn.addEventListener('click', () => this.handleBackClick());
     overlay.addEventListener('click', () => this.close());
 
     checkoutBtn.addEventListener('click', () => {
@@ -109,6 +118,24 @@ class CartModal {
   close() {
     this.modal.classList.remove('open');
     document.body.style.overflow = '';
+  }
+
+  handleBackClick() {
+    this.close();
+
+    const hasReferrer = Boolean(document.referrer);
+    const canGoBack = window.history && window.history.length > 1;
+
+    if (hasReferrer && canGoBack) {
+      try {
+        window.history.back();
+        return;
+      } catch (err) {
+        console.warn('history.back() failed, using fallback', err);
+      }
+    }
+
+    window.location.href = '/catalogue.html';
   }
 
   updateCartDisplay() {
