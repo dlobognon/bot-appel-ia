@@ -1016,10 +1016,10 @@ main {
 @media (max-width: 1024px) {
   /* Conserver le panier à droite entre 768px et 1024px */
   .header-inner { flex-wrap: nowrap; row-gap: 0; column-gap: clamp(8px, 1.5vw, 14px); }
-  .mobile-menu-toggle { order: 1; flex-shrink: 0; }
-  .brand { order: 2; min-width: 0; }
-  .nav { order: 3; flex: 1; min-width: 0; overflow-x: auto; padding: clamp(4px, 0.8vh, 6px) 0; justify-content: flex-start; }
-  .header-actions { order: 4; margin-left: auto; flex-shrink: 0; }
+  .brand { order: 1; min-width: 0; }
+  .nav { order: 2; flex: 1; min-width: 0; overflow-x: auto; padding: clamp(4px, 0.8vh, 6px) 0; justify-content: flex-start; }
+  .header-actions { order: 3; margin-left: auto; flex-shrink: 0; }
+  .mobile-menu-toggle { order: 4; flex-shrink: 0; }
   .product-detail { grid-template-columns: 1fr; gap: clamp(16px, 3vh, 32px); }
 }
 
@@ -1031,7 +1031,7 @@ main {
   .checkout-modal { align-items: flex-end; justify-content: center; }
   .checkout-modal-content { border-radius: 16px 16px 0 0; max-height: 100%; }
   
-  /* Menu hamburger à droite après le panier sur mobile */
+  /* Menu mobile à droite après le panier */
   .brand {
     order: 1;
     flex: 1;
@@ -1043,11 +1043,11 @@ main {
     margin-left: auto;
     display: flex;
     justify-content: flex-end;
-    gap: clamp(8px, 1.5vw, 12px);
   }
   
   .mobile-menu-toggle {
     order: 3;
+    margin-left: var(--spacing-sm);
   }
   
   .cart-item {
@@ -1438,14 +1438,13 @@ main {
   align-items: center;
   width: 44px;
   height: 44px;
-  padding: 0;
+  padding: 8px;
   background: transparent;
   border: 1px solid var(--stroke);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
-  order: 0;
-  margin-right: var(--spacing-xs);
+  position: relative;
 }
 
 .mobile-menu-toggle:hover {
@@ -1457,27 +1456,23 @@ main {
   background: rgba(255, 255, 255, 0.08);
 }
 
-/* Icône hamburger animée */
+/* Icône hamburger - 3 traits horizontaux */
 .hamburger-icon {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  width: 24px;
-  height: 24px;
-  justify-content: center;
-}
-
-.hamburger-icon::before,
-.hamburger-icon::after,
-.hamburger-icon {
-  content: '';
+  display: block;
   position: relative;
+  width: 24px;
+  height: 2px;
+  background: var(--text);
+  border-radius: 2px;
+  transition: all 0.3s ease;
 }
 
 .hamburger-icon::before,
 .hamburger-icon::after {
-  display: block;
-  width: 100%;
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 24px;
   height: 2px;
   background: var(--text);
   border-radius: 2px;
@@ -1485,22 +1480,11 @@ main {
 }
 
 .hamburger-icon::before {
-  transform-origin: 50% 100%;
-  margin-bottom: 6px;
+  top: -7px;
 }
 
 .hamburger-icon::after {
-  transform-origin: 50% 0%;
-  margin-top: 6px;
-}
-
-.hamburger-icon {
-  width: 100%;
-  height: 2px;
-  background: var(--text);
-  border-radius: 2px;
-  transition: all 0.3s ease;
-  margin: 0;
+  top: 7px;
 }
 
 /* Animation quand le menu est ouvert */
@@ -1779,8 +1763,13 @@ main {
   }
   
   .header-actions {
-    order: 3;
+    order: 2;
     margin-left: auto;
+  }
+  
+  .mobile-menu-toggle {
+    order: 3;
+    margin-left: var(--spacing-sm);
   }
   
   /* Dimensionner le menu mobile pour petits écrans */
