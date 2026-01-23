@@ -9,8 +9,8 @@ const PRODUCTS = [
     name: "Boxer Coton Premium (Lot de 3)",
     category: "Style",
     subcategory: "Boxeurs",
-    price: 18000,
-    oldPrice: 22000,
+    price: 14900,
+    oldPrice: 18000,
     promoLabel: "PROMO",
     images: [
       "assets/images/Boxer coton 1.png",
@@ -32,7 +32,7 @@ const PRODUCTS = [
     name: "Boxer Nylon Flex (Lot de 3)",
     category: "Style",
     subcategory: "Boxeurs",
-    price: 15000,
+    price: 14900,
     oldPrice: 18000,
     promoLabel: "PROMO",
     images: [
@@ -55,8 +55,8 @@ const PRODUCTS = [
     name: "Boxer coton (Lot de 3)",
     category: "Style",
     subcategory: "Boxeurs",
-    price: 18000,
-    oldPrice: 22000,
+    price: 14900,
+    oldPrice: 18000,
     promoLabel: "PROMO",
     images: [
     "assets/images/boxer coton 1.jpeg",
