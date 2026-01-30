@@ -10,6 +10,10 @@ class ProductDetail {
     this.quantity = 1;
     this.variantType = null;
     this.selectedVariant = null;
+    this.selectedColors = [];
+    this.colorSelectionMax = 3;
+    this.autoFillColorsToMax = true;
+    this.colorImageMap = null;
     this.init();
   }
 
@@ -41,7 +45,8 @@ class ProductDetail {
     const container = document.getElementById('productDetailContainer');
     const priceStr = window.formatPrice(this.product.price);
     const oldPriceStr = this.product.oldPrice ? window.formatPrice(this.product.oldPrice) : '';
-    const badge = this.product.promoLabel ? `<div class="promo-badge-wrapper" style="display: inline-flex; width: auto; flex: 0 0 auto; align-self: flex-start;"><div style="display: inline-flex; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; white-space: nowrap; border: 1px solid rgba(255,255,255,0.15); letter-spacing: 0.03em; width: auto; max-width: max-content; flex: 0 0 auto;">${this.product.promoLabel}</div></div>` : '';
+    const badgeDesktop = this.product.promoLabel ? `<div class="promo-badge-wrapper promo-badge-desktop" style="display: inline-flex; width: auto; flex: 0 0 auto; align-self: flex-start;"><div style="display: inline-flex; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; white-space: nowrap; border: 1px solid rgba(255,255,255,0.15); letter-spacing: 0.03em; width: auto; max-width: max-content; flex: 0 0 auto;">${this.product.promoLabel}</div></div>` : '';
+    const badgeMobile = this.product.promoLabel ? `<div class="promo-badge-wrapper promo-badge-mobile"><div style="display: inline-flex; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; white-space: nowrap; border: 1px solid rgba(255,255,255,0.15); letter-spacing: 0.03em; width: auto; max-width: max-content; flex: 0 0 auto;">${this.product.promoLabel}</div></div>` : '';
     const reviewsTitle = trDetail('reviews.title', 'Avis Clients');
     const reviewsFormTitle = trDetail('reviews.form_title', 'Laisser un avis');
     const reviewNameLabel = trDetail('reviews.name_label', 'Votre nom *');
@@ -66,6 +71,38 @@ class ProductDetail {
           ${variantOptions.map(opt => `<button type="button" class="variant-pill" data-value="${opt}">${opt}</button>`).join('')}
         </div>
         <div class="variant-current" id="variantCurrent">Sélection actuelle : <span>Non précisé</span></div>
+      </div>
+    ` : '';
+
+    // Sélecteur de couleurs (configurable par produit)
+    this.colorSelectionMax = Number.isInteger(this.product.colorSelectionMax) ? this.product.colorSelectionMax : 3;
+    this.autoFillColorsToMax = (typeof this.product.autoFillColorsToMax === 'boolean') ? this.product.autoFillColorsToMax : (this.colorSelectionMax > 1);
+    this.colorImageMap = Array.isArray(this.product.colorImageMap) ? this.product.colorImageMap : null;
+
+    const colorHtml = (this.product.colors && this.product.colors.length > 0) ? `
+      <div style="margin-bottom: 8px;">
+        <div id="colorSelector" style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+          ${this.product.colors.map((color, idx) => {
+            const colorMap = {
+              'blanc': '#f3f3f3',
+              'bleu nuit': '#2b3141',
+              'marron': '#8b4f3f',
+              'marron clair': '#caa17a',
+              'gris': '#9ca3af',
+              'noir': '#111827',
+              'blanc crème': '#f2e2c6',
+              'bleu': '#5a6f82',
+              'gris carreaulé noir': '#9aa0a6',
+              'beige carreaulé noir': '#d6c2a6',
+              'saumon': '#f6a6a0',
+              'marron carreaulé saumon': '#a96a55',
+              'beige': '#d7c3a5'
+            };
+            const hexColor = colorMap[color.toLowerCase()] || '#cccccc';
+            const mappedIndex = (this.colorImageMap && Number.isInteger(this.colorImageMap[idx])) ? this.colorImageMap[idx] : (idx + 1);
+            return `<button type="button" class="color-pill" data-color="${color}" data-image-index="${mappedIndex}" style="width: 30px; height: 30px; border-radius: 50%; background-color: ${hexColor}; border: 2px solid rgba(255,255,255,0.3); cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center;" title="${color}"><span class="color-label" style="display: none; color: #000; font-size: 10px; font-weight: 700;">${color.charAt(0).toUpperCase()}</span></button>`;
+          }).join('')}
+        </div>
       </div>
     ` : '';
 
@@ -118,14 +155,28 @@ class ProductDetail {
       </div>
     ` : '';
 
+    const boxerNylonExtra = (this.product.name || '').toLowerCase().includes('nylon') ? `
+      <div style="margin-top:15px; padding:12px; background:#f8f8f8; border-radius:6px; color:#111;">
+        <strong>Pourquoi ce boxer vaut son prix :</strong>
+        <ul style="margin-top:8px; padding-left:18px;">
+          <li>Nylon premium respirant, idéal pour la chaleur</li>
+          <li>Extensible et confortable, ne serre pas</li>
+          <li>Garde sa forme après lavage</li>
+          <li>Finition soignée, qualité durable</li>
+        </ul>
+      </div>
+    ` : '';
+
     container.innerHTML = `
       <div class="product-layout">
         <!-- COLONNE GAUCHE : Galerie + Sélecteur de tailles -->
         <div class="product-gallery-section">
           <div class="product-gallery">
             <div class="product-main-image">
+              ${badgeMobile}
               <img id="mainImage" src="${this.product.images[0]}" alt="${this.product.name}">
             </div>
+            <h1 class="product-detail-name product-detail-name-mobile">${this.product.name}</h1>
             <div class="product-thumbnails">
               ${this.product.images.slice(0, 6).map((img, i) => `
                 <div class="product-thumbnail ${i === 0 ? 'active' : ''}" data-index="${i}">
@@ -134,26 +185,31 @@ class ProductDetail {
               `).join('')}
             </div>
           </div>
-          ${variantHtml}
         </div>
 
         <!-- COLONNE DROITE : Info achat (prix, quantité, bouton) -->
         <div class="product-purchase-section">
-          ${badge}
-          <h1 class="product-detail-name">${this.product.name}</h1>
+          ${badgeDesktop}
+          <h1 class="product-detail-name product-detail-name-desktop">${this.product.name}</h1>
           
           <div class="product-detail-price">
             <span class="product-detail-current-price">${priceStr}</span>
             ${oldPriceStr ? `<span class="product-detail-old-price">${oldPriceStr}</span>` : ''}
           </div>
 
-          <div class="product-actions-large">
-            <div class="product-qty">
-              <button class="qty-btn" id="qtyMinus" type="button">−</button>
-              <input type="number" class="qty-input" id="qtyInput" value="1" min="1" readonly>
-              <button class="qty-btn" id="qtyPlus" type="button">+</button>
+          <div class="product-selection-row">
+            <div class="product-selectors">
+              ${colorHtml}
+              ${variantHtml}
             </div>
-            <button class="add-to-cart-btn-large" id="addToCartBtn" type="button" data-i18n="product.add_to_cart">${addToCartLabel}</button>
+            <div class="product-actions-large">
+              <div class="product-qty">
+                <button class="qty-btn" id="qtyMinus" type="button">−</button>
+                <input type="number" class="qty-input" id="qtyInput" value="1" min="1" readonly>
+                <button class="qty-btn" id="qtyPlus" type="button">+</button>
+              </div>
+              <button class="add-to-cart-btn-large" id="addToCartBtn" type="button" data-i18n="product.add_to_cart">${addToCartLabel}</button>
+            </div>
           </div>
 
           <p style="color: rgba(255,255,255,0.7); font-size: 13px; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.08);">
@@ -167,6 +223,7 @@ class ProductDetail {
       <!-- DESCRIPTION & AVANTAGES (pleine largeur) -->
       <div class="product-details-info">
         <p class="product-description">${this.product.description}</p>
+        ${boxerNylonExtra}
         ${benefitsHtml}
       </div>
 
@@ -215,8 +272,32 @@ class ProductDetail {
     const addBtn = document.getElementById('addToCartBtn');
     if (addBtn) {
       addBtn.addEventListener('click', () => {
-        const variantValue = this.selectedVariant || null;
+        let variantValue = this.selectedVariant || null;
+        let colorsToAdd = [...this.selectedColors];
+        
+        // Si autoFill actif, compléter jusqu'au max configuré
+        if (this.autoFillColorsToMax && this.product.colors && colorsToAdd.length >= 1 && this.colorSelectionMax > 1) {
+          const availableColors = this.product.colors.filter(c => !colorsToAdd.includes(c));
+          while (colorsToAdd.length < this.colorSelectionMax && availableColors.length > 0) {
+            const randomIndex = Math.floor(Math.random() * availableColors.length);
+            colorsToAdd.push(availableColors[randomIndex]);
+            availableColors.splice(randomIndex, 1);
+          }
+        }
+        // Si trop de couleurs sélectionnées, limiter au max configuré
+        if (colorsToAdd.length > this.colorSelectionMax) {
+          colorsToAdd = colorsToAdd.slice(0, this.colorSelectionMax);
+        }
+        // Si aucune couleur, ne rien ajouter
+        // Si 2-3 couleurs, les ajouter tel quel
+        
+        // Ajouter au panier avec les couleurs (sans perdre la taille)
+        if (colorsToAdd.length > 0) {
+          const sizeLabel = variantValue ? variantValue : 'Non précisé';
+          variantValue = `${sizeLabel} — Couleurs: ${colorsToAdd.join(', ')}`;
+        }
         window.cart.addItem(this.product, this.quantity, this.variantType, variantValue);
+        
         const originalText = addBtn.textContent;
         addBtn.textContent = '✓ Ajouté au panier!';
         addBtn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
@@ -228,6 +309,7 @@ class ProductDetail {
     }
 
     this.attachVariantListeners();
+    this.attachColorListeners();
 
     // Initialiser le système d'avis
     this.initReviewSystem();
@@ -323,6 +405,55 @@ class ProductDetail {
       setTimeout(() => msgDiv.remove(), 300);
     }, 3000);
   }
+
+  attachColorListeners() {
+    const colorPills = document.querySelectorAll('.color-pill');
+    const colorCurrent = document.getElementById('colorCurrent');
+    
+    if (colorPills.length === 0) return;
+    
+    colorPills.forEach(pill => {
+      pill.addEventListener('click', (e) => {
+        e.preventDefault();
+        const color = pill.dataset.color;
+        const imageIndex = parseInt(pill.dataset.imageIndex, 10);
+        
+        // Limiter au nombre max configuré
+        if (this.selectedColors.includes(color)) {
+          this.selectedColors = this.selectedColors.filter(c => c !== color);
+          pill.style.borderColor = 'rgba(255,255,255,0.3)';
+          pill.style.boxShadow = 'none';
+        } else {
+          if (this.colorSelectionMax === 1) {
+            this.selectedColors = [color];
+            colorPills.forEach(p => {
+              p.style.borderColor = 'rgba(255,255,255,0.3)';
+              p.style.boxShadow = 'none';
+            });
+            pill.style.borderColor = '#10b981';
+            pill.style.boxShadow = '0 0 12px rgba(16, 185, 129, 0.5)';
+          } else if (this.selectedColors.length < this.colorSelectionMax) {
+            this.selectedColors.push(color);
+            pill.style.borderColor = '#10b981';
+            pill.style.boxShadow = '0 0 12px rgba(16, 185, 129, 0.5)';
+          } else {
+            alert(`Vous pouvez sélectionner au maximum ${this.colorSelectionMax} couleurs`);
+            return;
+          }
+        }
+        
+        // Mettre à jour l'affichage
+        if (colorCurrent) {
+          colorCurrent.innerHTML = `Couleurs sélectionnées : <span style="color: #10b981;">${this.selectedColors.length}/${this.colorSelectionMax}</span>`;
+        }
+
+        if (!Number.isNaN(imageIndex)) {
+          this.selectImage(imageIndex);
+        }
+      });
+    });
+  }
+
 
   selectImage(index) {
     this.currentImageIndex = index;

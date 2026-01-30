@@ -11,30 +11,67 @@ const tr = (key, fallback) => (typeof window.t === 'function') ? window.t(key) :
 // ===== CALCUL DE LIVRAISON IVOIRIEN =====
 // Logique fiable et testable pour les frais de livraison
 
-// Communes d'Abidjan (livraison gratuite par défaut sauf zones spéciales)
-const ABIDJAN_COMMUNES = [
+// Zones/communes/quartiers d'Abidjan (livraison gratuite)
+const ABIDJAN_KEYWORDS = [
+  'abidjan',
   'abobo',
-  'adjamé',
-  'attécoubé',
+  'adjame',
+  'attecoube',
   'cocody',
   'koumassi',
   'marcory',
   'plateau',
   'treichville',
-  'yopougon'
+  'yopougon',
+  'port bouet',
+  'portbouet',
+  'bingerville',
+  'anyama',
+  'songon',
+  'angre',
+  'riviera',
+  'deux plateaux',
+  '2 plateaux',
+  'zone 4',
+  'zone4',
+  'faya'
 ];
 
-// Zones à 1000 FCFA (PRIORITÉ sur gratuité Abidjan)
-const SPECIAL_ZONES_1000 = [
-  'grand-bassam',
-  'grand bassam',
-  'port-bouët',
-  'port bouet',
-  'yopougon zone industrielle',
-  'anyama',
-  'abobo',
-  'bingerville'
-];
+const SHIPPING_RATES = {
+  ABIDJAN: 0,
+  EXPEDITION: 2000
+};
+
+function normalizeLocation(input) {
+  if (!input || typeof input !== 'string') return '';
+  return input
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/['’]/g, ' ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function isAbidjanLocation(input) {
+  const normalized = normalizeLocation(input);
+  if (!normalized) return false;
+  return ABIDJAN_KEYWORDS.some(keyword => normalized.includes(keyword));
+}
+
+function getShippingInfo(city) {
+  const normalized = normalizeLocation(city);
+  if (!normalized) {
+    return { fee: null, status: 'unknown', isAbidjan: false };
+  }
+  const abidjan = isAbidjanLocation(normalized);
+  return {
+    fee: abidjan ? SHIPPING_RATES.ABIDJAN : SHIPPING_RATES.EXPEDITION,
+    status: abidjan ? 'abidjan' : 'outside',
+    isAbidjan: abidjan
+  };
+}
 
 /**
  * Calcule les frais de livraison selon la ville/lieu
@@ -42,34 +79,13 @@ const SPECIAL_ZONES_1000 = [
  * @returns {number} Les frais de livraison en FCFA
  * 
  * Règles:
- * 1. Si zone à 1000 FCFA → 1000 FCFA (PRIORITÉ)
- * 2. Si commune d'Abidjan (et pas zone 1000) → 0 FCFA (GRATUIT)
- * 3. Sinon → 2000 FCFA (Hors Abidjan)
+ * 1. Abidjan (communes/quartiers) → 0 FCFA
+ * 2. Expéditions hors Abidjan → 2 000 FCFA
+ * 3. Si aucun lieu n'est renseigné → à confirmer (retourne null)
  */
 function calculateShipping(city) {
-  // Normaliser: minuscules, espaces, accents
-  if (!city || typeof city !== 'string' || city.trim() === '') {
-    return 0; // Aucun calcul tant que le lieu n'est pas renseigné
-  }
-  
-  const normalizedCity = city.toLowerCase().trim();
-  
-  // RÈGLE 1: Vérifier zones à 1000 FCFA (PRIORITÉ absolue)
-  for (let zone of SPECIAL_ZONES_1000) {
-    if (normalizedCity.includes(zone)) {
-      return 1000; // Zone 1000 FCFA
-    }
-  }
-  
-  // RÈGLE 2: Vérifier communes d'Abidjan (Gratuit)
-  for (let commune of ABIDJAN_COMMUNES) {
-    if (normalizedCity.includes(commune)) {
-      return 0; // Abidjan gratuit (et pas en zone 1000)
-    }
-  }
-  
-  // RÈGLE 3: Hors Abidjan et pas en zone 1000
-  return 2000;
+  const info = getShippingInfo(city);
+  return info.fee;
 }
 
 /**
@@ -78,18 +94,15 @@ function calculateShipping(city) {
  */
 function testShipping() {
   const testCases = [
-    { city: 'Plateau', expected: 0 },
-    { city: 'Cocody', expected: 0 },
-    { city: 'Yopougon', expected: 0 },
-    { city: 'Grand-Bassam', expected: 1000 },
-    { city: 'Port-Bouët', expected: 1000 },
-    { city: 'Yopougon Zone Industrielle', expected: 1000 },
-    { city: 'Anyama', expected: 1000 },
-    { city: 'Abobo', expected: 1000 },
-    { city: 'Bingerville', expected: 1000 },
-    { city: 'Yamoussoukro', expected: 2000 },
-    { city: 'Bouaké', expected: 2000 },
-    { city: '', expected: 0 }
+    { city: 'Plateau', expected: SHIPPING_RATES.ABIDJAN },
+    { city: 'Cocody', expected: SHIPPING_RATES.ABIDJAN },
+    { city: 'Yopougon', expected: SHIPPING_RATES.ABIDJAN },
+    { city: 'Faya', expected: SHIPPING_RATES.ABIDJAN },
+    { city: 'Attécoubé', expected: SHIPPING_RATES.ABIDJAN },
+    { city: 'Grand-Bassam', expected: SHIPPING_RATES.EXPEDITION },
+    { city: 'Yamoussoukro', expected: SHIPPING_RATES.EXPEDITION },
+    { city: 'Bouaké', expected: SHIPPING_RATES.EXPEDITION },
+    { city: '', expected: null }
   ];
   
   console.log('🧪 TEST CALCUL LIVRAISON:');
@@ -230,6 +243,13 @@ function formatPrice(price) {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
   }).format(price);
+}
+
+function formatPriceSafe(value, fallbackText) {
+  if (typeof value === 'number' && !Number.isNaN(value)) {
+    return formatPrice(value);
+  }
+  return fallbackText || '';
 }
 
 function getProductById(id) {

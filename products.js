@@ -10,7 +10,7 @@ const PRODUCTS = [
     category: "Style",
     subcategory: "Boxeurs",
     price: 14900,
-    oldPrice: 18000,
+    oldPrice: 19000,
     promoLabel: "PROMO",
     images: [
       "assets/images/Boxer coton 1.png",
@@ -20,8 +20,9 @@ const PRODUCTS = [
       "assets/images/Boxer coton 5.png",
     
     ],
-    description: "Confort naturel premium – idéal pour le quotidien et les longues journées.",
+    description: "Lot de 3 boxers premium en nylon extensible – confort, maintien et élégance au quotidien.",
     benefits: ["Respirant et doux", "Ceinture confortable", "Tenue parfaite toute la journée"],
+    colors: ["gris carreaulé noir", "beige carreaulé noir", "saumon", "marron carreaulé saumon"],
     reviews: [
       { name: "Kouassi A.", stars: 5, text: "Très confortable. La qualité est vraiment au-dessus." },
       { name: "Yao K.", stars: 5, text: "Livraison rapide et produit conforme. Je recommande." }
@@ -33,7 +34,7 @@ const PRODUCTS = [
     category: "Style",
     subcategory: "Boxeurs",
     price: 14900,
-    oldPrice: 18000,
+    oldPrice: 19000,
     promoLabel: "PROMO",
     images: [
      "assets/images/Boxer nylon1.jpeg",
@@ -45,6 +46,7 @@ const PRODUCTS = [
     ],
     description: "Nylon extensible – confort maximal et liberté de mouvement.",
     benefits: ["Stretch et léger", "Conçu pour bouger", "Séchage rapide"],
+    colors: ["blanc", "marron", "blanc crème", "bleu", "bleu nuit"],
     reviews: [
       { name: "N'Guessan J.", stars: 5, text: "Top pour le sport et les longues journées." },
       { name: "Mariam C.", stars: 4, text: "Bonne matière, le confort est réel." }
@@ -56,7 +58,7 @@ const PRODUCTS = [
     category: "Style",
     subcategory: "Boxeurs",
     price: 14900,
-    oldPrice: 18000,
+    oldPrice: 15000,
     promoLabel: "PROMO",
     images: [
     "assets/images/boxer coton 1.jpeg",
@@ -68,6 +70,7 @@ const PRODUCTS = [
     ],
     description: "Confort naturel premium – idéal pour le quotidien et les longues journées.",
     benefits: ["Respirant et doux", "Ceinture confortable", "Tenue parfaite toute la journée"],
+    colors: ["blanc", "marron clair", "gris", "noir"],
     reviews: [
       { name: "Cissé.b", stars: 5, text: "Livraison rapide et produit conforme. Je recommande." }
     ]
@@ -87,6 +90,10 @@ const PRODUCTS = [
     ],
     description: "Ballerines brillantes en strass.",
     benefits: ["Matiere solide", "brillances intense", "Confort assuré"],
+    colors: ["noir", "bleu", "beige"],
+    colorImageMap: [1, 3, 2],
+    colorSelectionMax: 1,
+    autoFillColorsToMax: false,
     reviews: [
       { name: "Théo R.", stars: 5, text: "Classique et intemporel. Excellent investissement." }
     ]

@@ -207,17 +207,22 @@ class CheckoutModal {
 
   getFormData() {
     const form = this.modal.querySelector('#checkoutForm');
-    
+    const cityValue = form.querySelector('#city').value.trim();
+    const shippingPendingText = trCheckout('shipping.to_confirm', 'À confirmer');
+    const shippingInfo = (typeof getShippingInfo === 'function') ? getShippingInfo(cityValue) : { fee: 2000 };
+    const shippingFee = (shippingInfo && typeof shippingInfo.fee === 'number') ? shippingInfo.fee : null;
+    const totalValue = (shippingFee === null) ? null : (window.cart.getSubtotal() + shippingFee);
+
     return {
       customerName: form.querySelector('#customerName').value.trim() || 'N.A.',
       phone: form.querySelector('#phone').value.trim(),
-      city: form.querySelector('#city').value.trim() || 'Non spécifié',
+      city: cityValue || 'Non spécifié',
       comment: form.querySelector('#comment').value.trim() || '',
       timestamp: new Date().toLocaleString('fr-CI'),
       items: window.cart.items,
       subtotal: window.cart.getSubtotal(),
-      shipping: calculateShipping(form.querySelector('#city').value.trim()),
-      total: window.cart.getSubtotal() + calculateShipping(form.querySelector('#city').value.trim())
+      shipping: (shippingFee === null) ? shippingPendingText : shippingFee,
+      total: (totalValue === null) ? shippingPendingText : totalValue
     };
   }
 
@@ -226,8 +231,11 @@ class CheckoutModal {
 
     const subtotal = window.cart.getSubtotal();
     const cityInput = this.modal.querySelector('#city').value.trim();
-    const shipping = calculateShipping(cityInput);
-    const total = subtotal + shipping;
+    const shippingPendingText = trCheckout('shipping.to_confirm', 'À confirmer');
+    const totalPendingText = trCheckout('total.to_confirm', 'À confirmer');
+    const shippingInfo = (typeof getShippingInfo === 'function') ? getShippingInfo(cityInput) : { fee: 2000 };
+    const shipping = (shippingInfo && typeof shippingInfo.fee === 'number') ? shippingInfo.fee : null;
+    const total = (shipping === null) ? null : subtotal + shipping;
 
     const summaryHTML = window.cart.items.map(item => {
       const label = item.variantType === 'boxer' ? 'Taille' : (item.variantType === 'shoes' ? 'Pointure' : 'Option');
@@ -245,8 +253,8 @@ class CheckoutModal {
 
     this.modal.querySelector('#orderSummary').innerHTML = summaryHTML;
     this.modal.querySelector('#checkoutSubtotal').textContent = window.formatPrice(subtotal);
-    this.modal.querySelector('#checkoutShipping').textContent = window.formatPrice(shipping);
-    this.modal.querySelector('#checkoutTotal').textContent = window.formatPrice(total);
+    this.modal.querySelector('#checkoutShipping').textContent = window.formatPriceSafe(shipping, shippingPendingText);
+    this.modal.querySelector('#checkoutTotal').textContent = window.formatPriceSafe(total, totalPendingText);
   }
 
   sendViaWhatsApp() {
@@ -256,6 +264,9 @@ class CheckoutModal {
       const value = item.variantLabel || 'Non précisé';
       return `${item.name} x${item.quantity} (${label}: ${value}) - ${window.formatPrice(item.price * item.quantity)}`;
     }).join('\n');
+
+    const shippingText = window.formatPriceSafe(formData.shipping, formData.shipping);
+    const totalText = window.formatPriceSafe(formData.total, formData.total);
     
     const message = `
   *NOUVELLE COMMANDE* 📦
@@ -268,8 +279,8 @@ class CheckoutModal {
   ${items}
 
   *Sous-total:* ${window.formatPrice(formData.subtotal)}
-  *Livraison:* ${window.formatPrice(formData.shipping)}
-  *TOTAL:* ${window.formatPrice(formData.total)}
+  *Livraison:* ${shippingText}
+  *TOTAL:* ${totalText}
 
   ${formData.comment ? `*Note:* ${formData.comment}` : ''}
 

@@ -204,12 +204,18 @@ class CartModal {
     if (!window.cart) return;
 
     const subtotal = window.cart.getSubtotal();
-    const shipping = 0; // Frais affichés à 0 FCFA dans le panier
-    const total = subtotal;
+    const hasItems = window.cart.items.length > 0;
+    const shippingPendingText = (typeof window.t === 'function') ? window.t('shipping.to_confirm') : 'À confirmer';
+    const totalPendingText = (typeof window.t === 'function') ? window.t('total.to_confirm') : 'À confirmer';
+    const shippingInfo = hasItems && (typeof getShippingInfo === 'function')
+      ? getShippingInfo('')
+      : { fee: 0 };
+    const shipping = (shippingInfo && typeof shippingInfo.fee === 'number') ? shippingInfo.fee : null;
+    const total = (shipping === null) ? null : subtotal + shipping;
 
     this.modal.querySelector('#cartSubtotal').textContent = window.formatPrice(subtotal);
-    this.modal.querySelector('#cartShipping').textContent = window.formatPrice(shipping);
-    this.modal.querySelector('#cartTotal').textContent = window.formatPrice(total);
+    this.modal.querySelector('#cartShipping').textContent = window.formatPriceSafe(shipping, shippingPendingText);
+    this.modal.querySelector('#cartTotal').textContent = window.formatPriceSafe(total, totalPendingText);
   }
 }
 
